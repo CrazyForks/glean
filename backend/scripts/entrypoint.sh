@@ -9,17 +9,18 @@ attempt=0
 while [ $attempt -lt $max_attempts ]; do
     if uv run python -c "
 import asyncio
+from sqlalchemy import text
 from glean_database.session import init_database, get_session
 
 async def check():
     init_database('$DATABASE_URL')
     async for session in get_session():
-        await session.execute('SELECT 1')
+        await session.execute(text('SELECT 1'))
         return True
     return False
 
 asyncio.run(check())
-" 2>/dev/null; then
+" 2>&1; then
         echo "PostgreSQL is ready!"
         break
     fi

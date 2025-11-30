@@ -117,6 +117,9 @@ npm install
 # 启动基础设施
 make up
 
+# 初始化数据库（仅首次需要）
+make db-upgrade
+
 # 启动所有服务
 make dev-all
 
