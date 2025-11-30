@@ -147,6 +147,121 @@ Environment variables are defined in `.env` (copy from `.env.example`):
 
 The API and worker both load config using `pydantic-settings`.
 
+## Project Layout
+
+```
+glean/                              # Project root
+├── .env                          # Environment configuration
+├── .env.example                  # Environment template
+├── .github/                      # GitHub Actions workflows
+├── .gitignore                    # Git ignore patterns
+├── CLAUDE.md                     # This file - Claude Code guidance
+├── LICENSE                       # Project license
+├── Makefile                      # Development commands
+├── README.md                     # Project documentation
+├── backend/                      # Python backend monorepo
+│   ├── apps/                     # Deployable applications
+│   │   ├── api/                  # FastAPI REST API server
+│   │   │   ├── glean_api/        # API source code
+│   │   │   │   ├── middleware/   # Custom middleware
+│   │   │   │   └── routers/      # API route handlers
+│   │   │   │       ├── auth.py   # Authentication endpoints
+│   │   │   │       ├── feeds.py   # RSS feed endpoints
+│   │   │   │       ├── entries.py # Article/entry endpoints
+│   │   │   │       └── admin.py   # Admin endpoints
+│   │   │   └── tests/            # API tests
+│   │   └── worker/               # Background task worker
+│   │       ├── glean_worker/     # Worker source code
+│   │       │   └── tasks/        # Background task functions
+│   │       └── tests/            # Worker tests
+│   ├── packages/                 # Shared backend libraries
+│   │   ├── database/             # SQLAlchemy models & migrations
+│   │   │   ├── glean_database/
+│   │   │   │   ├── models/       # SQLAlchemy model definitions
+│   │   │   │   ├── migrations/   # Alembic migration scripts
+│   │   │   │   │   └── versions/  # Generated migration files
+│   │   │   │   └── session.py    # Database session management
+│   │   │   └── alembic.ini       # Alembic configuration
+│   │   ├── core/                 # Business logic & domain services
+│   │   │   ├── glean_core/
+│   │   │   │   ├── auth/         # Authentication utilities
+│   │   │   │   ├── schemas/      # Pydantic data models
+│   │   │   │   └── services/     # Business logic services
+│   │   │   └── pyproject.toml    # Core package configuration
+│   │   └── rss/                  # RSS/Atom parsing utilities
+│   │       ├── glean_rss/        # RSS parsing source code
+│   │       └── pyproject.toml    # RSS package configuration
+│   ├── tests/                    # Backend test suites
+│   ├── Dockerfile                # Backend container definition
+│   └── pyproject.toml            # Backend workspace configuration
+├── frontend/                     # TypeScript frontend monorepo
+│   ├── apps/                     # Frontend applications
+│   │   ├── web/                  # Main React web app
+│   │   │   ├── src/
+│   │   │   │   ├── components/   # React components
+│   │   │   │   ├── pages/        # Page components
+│   │   │   │   ├── hooks/        # Custom React hooks
+│   │   │   │   ├── stores/       # Zustand state stores
+│   │   │   │   ├── lib/          # Utility functions
+│   │   │   │   └── styles/       # CSS/Tailwind styles
+│   │   │   ├── public/           # Static assets
+│   │   │   ├── tests/            # Component and hook tests
+│   │   │   ├── Dockerfile        # Web app container
+│   │   │   ├── index.html        # HTML template
+│   │   │   ├── nginx.conf        # Nginx configuration
+│   │   │   ├── package.json      # Dependencies and scripts
+│   │   │   ├── tailwind.config.ts # Tailwind CSS configuration
+│   │   │   ├── tsconfig.json     # TypeScript configuration
+│   │   │   ├── vite.config.ts    # Vite build configuration
+│   │   │   └── postcss.config.js # PostCSS configuration
+│   │   └── admin/                # Admin dashboard app
+│   │       └── src/              # Admin app source structure
+│   │           ├── components/   # Admin-specific components
+│   │           ├── hooks/         # Admin-specific hooks
+│   │           ├── pages/         # Admin page components
+│   │           ├── stores/        # Admin state management
+│   │           └── lib/           # Admin utilities
+│   ├── packages/                 # Shared frontend libraries
+│   │   ├── ui/                   # Shared React components
+│   │   │   ├── src/
+│   │   │   │   ├── components/   # Reusable UI components
+│   │   │   │   └── utils/        # UI utility functions
+│   │   │   └── package.json     # UI package configuration
+│   │   ├── api-client/           # TypeScript API client SDK
+│   │   │   ├── src/
+│   │   │   │   └── services/     # API service functions
+│   │   │   │       ├── auth.ts   # Authentication API calls
+│   │   │   │       ├── feeds.ts  # Feed management API calls
+│   │   │   │       └── entries.ts # Entry management API calls
+│   │   │   └── package.json     # API client configuration
+│   │   └── types/                # Shared TypeScript types
+│   │       ├── src/
+│   │       │   ├── models.ts     # Data model type definitions
+│   │       │   └── api.ts        # API request/response types
+│   │       └── package.json     # Types package configuration
+│   ├── .eslintrc.cjs             # ESLint configuration
+│   ├── .prettierrc               # Prettier formatting rules
+│   ├── package.json              # Frontend workspace configuration
+│   ├── pnpm-workspace.yaml       # pnpm workspace definition
+│   ├── pnpm-lock.yaml            # pnpm lockfile
+│   └── turbo.json                # Turborepo task configuration
+├── deploy/                       # Deployment configurations
+│   ├── docker-compose.dev.yml    # Development stack
+│   ├── docker-compose.prod.yml   # Production stack
+│   ├── docker/                   # Container build files
+│   ├── .env.prod.example         # Production environment template
+│   └── README.md                 # Deployment documentation
+├── docs/                         # Project documentation
+└── scripts/                      # Utility scripts
+```
+
+### Key Directory Relationships
+
+- **Backend Apps → Packages**: `api` and `worker` depend on `core`, `database`, and `rss` packages
+- **Frontend Apps → Packages**: `web` and `admin` depend on `ui`, `api-client`, and `types` packages
+- **Database Flow**: `api` → `core` → `database` ← `rss` ← `worker`
+- **Frontend Flow**: `apps` → `packages` (shared dependencies)
+
 ## Key Development Notes
 
 ### Database Changes
@@ -174,3 +289,7 @@ The API and worker both load config using `pydantic-settings`.
 - Backend: 100 char line length, ruff for formatting
 - Frontend: Prettier with Tailwind plugin
 - Import order: stdlib → third-party → workspace packages
+
+### Executing Commands
+- Note that this project uses monorepo structure, so you need to check your current working directory before executing commands.
+- Use `uv` instead of `python` to avoid virtual environment issues.
