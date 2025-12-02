@@ -1,10 +1,12 @@
 """Global pytest fixtures for testing."""
 
 import asyncio
+import contextlib
 import os
 from collections.abc import AsyncGenerator, Generator
 from typing import Any
 
+import dotenv
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
@@ -14,6 +16,9 @@ from sqlalchemy.pool import NullPool
 from glean_api.main import app
 from glean_database import Base
 from glean_database.session import get_session
+
+with contextlib.suppress(OSError):
+    dotenv.load_dotenv()
 
 
 class MockArqRedis:
@@ -40,7 +45,7 @@ TEST_DATABASE_URL = os.getenv(
 @pytest.fixture(scope="session")
 def event_loop() -> Generator:
     """Create event loop for session scope."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
+    loop = asyncio.new_event_loop()
     yield loop
     loop.close()
 
@@ -169,14 +174,15 @@ async def admin_user(db_session: AsyncSession):
 @pytest_asyncio.fixture
 async def admin_headers(admin_user) -> dict[str, str]:
     """Generate auth headers for admin user."""
-    from glean_core.auth.jwt import create_access_token
+    from glean_api.config import settings
+    from glean_core.auth.jwt import JWTConfig, create_access_token
 
-    access_token = create_access_token(
-        data={
-            "sub": admin_user.id,
-            "username": admin_user.username,
-            "role": admin_user.role.value,
-            "type": "admin",
-        }
+    jwt_config = JWTConfig(
+        secret_key=settings.secret_key,
+        algorithm=settings.jwt_algorithm,
+        access_token_expire_minutes=settings.jwt_access_token_expire_minutes,
+        refresh_token_expire_days=settings.jwt_refresh_token_expire_days,
     )
+
+    access_token = create_access_token(str(admin_user.id), jwt_config, "admin")
     return {"Authorization": f"Bearer {access_token}"}
