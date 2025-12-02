@@ -47,6 +47,8 @@ services:
       SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-string}
       CORS_ORIGINS: '["http://localhost", "http://localhost:3000", "http://localhost:3001"]'
       DEBUG: ${DEBUG:-false}
+      # Only backend runs migrations to avoid race conditions
+      RUN_MIGRATIONS: "true"
       # Admin auto-creation (set to true for first startup)
       CREATE_ADMIN: ${CREATE_ADMIN:-false}
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
@@ -57,10 +59,16 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - glean-network
     restart: unless-stopped
-    command: ["uv", "run", "uvicorn", "glean_api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    command: ["uv", "run", "--no-sync", "uvicorn", "glean_api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
   worker:
     image: ghcr.io/leslieleung/glean-backend:latest
@@ -74,10 +82,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      backend:
+        condition: service_healthy
     networks:
       - glean-network
     restart: unless-stopped
-    command: ["uv", "run", "arq", "glean_worker.main.WorkerSettings"]
+    command: ["uv", "run", "--no-sync", "arq", "glean_worker.main.WorkerSettings"]
 
   web:
     image: ghcr.io/leslieleung/glean-web:latest

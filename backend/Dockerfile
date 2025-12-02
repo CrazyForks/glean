@@ -38,4 +38,4 @@ EXPOSE 8000
 ENTRYPOINT ["/app/scripts/entrypoint.sh"]
 
 # Default command (API server - can be overridden for worker)
-CMD ["uv", "run", "uvicorn", "glean_api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "--no-sync", "uvicorn", "glean_api.main:app", "--host", "0.0.0.0", "--port", "8000"]

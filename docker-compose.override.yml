@@ -1,8 +1,19 @@
 # Override file for local development builds
 # Usage: docker compose up -d (automatically uses docker-compose.yml + docker-compose.override.yml)
 # Or: docker compose -f docker-compose.full.yml -f docker-compose.override.yml up -d
+#
+# This override uses separate test volumes to avoid conflicts with dev database.
+# To completely reset test data: docker compose down -v
 
 services:
+  postgres:
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+
+  redis:
+    volumes:
+      - redis_test_data:/data
+
   backend:
     build:
       context: ./backend
@@ -14,4 +25,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     image: glean-backend:local
+
+volumes:
+  postgres_test_data:
+  redis_test_data:
 
