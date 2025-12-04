@@ -19,16 +19,46 @@ export class ApiClient {
     resolve: (token: string) => void
     reject: (error: unknown) => void
   }> = []
+  private cachedApiUrl: string | null = null
+  private isElectron: boolean
 
   constructor(config: { baseURL?: string; timeout?: number } = {}) {
+    // Check if running in Electron environment
+    this.isElectron = typeof window !== 'undefined' && !!window.electronAPI
+
+    // Always use /api as base URL (works for both web and Electron)
+    const baseURL = config.baseURL || '/api'
+
+    if (this.isElectron) {
+      // Initialize cache asynchronously
+      this.initializeApiUrlCache()
+    }
+
     this.client = axios.create({
-      baseURL: config.baseURL || '/api',
+      baseURL,
       timeout: config.timeout || 30000,
       headers: { 'Content-Type': 'application/json' },
     })
 
-    // Request interceptor: Attach auth token
-    this.client.interceptors.request.use((config) => {
+    // Request interceptor: Attach auth token and handle Electron API URL
+    this.client.interceptors.request.use(async (config) => {
+      // In Electron, modify baseURL to include the backend server URL
+      if (this.isElectron) {
+        const apiUrl = await this.getApiUrl()
+        if (apiUrl) {
+          // Additional validation: ensure apiUrl is safe to use
+          if (!this.isValidUrl(apiUrl)) {
+            console.error('Refusing to use invalid API URL in request:', apiUrl)
+            return Promise.reject(new Error('Invalid API URL configuration'))
+          }
+
+          // apiUrl is like "http://localhost:8000"
+          // baseURL is like "/api"
+          // Result should be "http://localhost:8000/api"
+          config.baseURL = `${apiUrl}${config.baseURL}`
+        }
+      }
+
       const token = localStorage.getItem('access_token')
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
@@ -106,6 +136,69 @@ export class ApiClient {
         }
       }
     )
+  }
+
+  /**
+   * Initialize API URL cache for Electron environment
+   */
+  private async initializeApiUrlCache(): Promise<void> {
+    if (!this.isElectron || !window.electronAPI) return
+
+    try {
+      const url = await window.electronAPI.getApiUrl()
+      // Validate URL before caching
+      if (this.isValidUrl(url)) {
+        this.cachedApiUrl = url
+      } else {
+        console.error('Invalid API URL loaded from configuration:', url)
+        // Fall back to default
+        this.cachedApiUrl = 'http://localhost:8000'
+      }
+    } catch (error) {
+      console.error('Failed to initialize API URL cache:', error)
+    }
+  }
+
+  /**
+   * Validate URL format and protocol
+   * Only allows HTTP and HTTPS protocols
+   */
+  private isValidUrl(url: string): boolean {
+    try {
+      const parsedUrl = new URL(url)
+      return ['http:', 'https:'].includes(parsedUrl.protocol)
+    } catch {
+      return false
+    }
+  }
+
+  /**
+   * Get API URL with caching for performance
+   * Cache is invalidated on page reload (when settings change)
+   */
+  private async getApiUrl(): Promise<string> {
+    if (this.cachedApiUrl) {
+      return this.cachedApiUrl
+    }
+
+    if (!window.electronAPI) {
+      return ''
+    }
+
+    try {
+      const url = await window.electronAPI.getApiUrl()
+      // Validate URL before caching
+      if (this.isValidUrl(url)) {
+        this.cachedApiUrl = url
+        return this.cachedApiUrl
+      } else {
+        console.error('Invalid API URL retrieved from Electron:', url)
+        return ''
+      }
+    } catch (error) {
+      console.error('Failed to get API URL from Electron:', error)
+      return ''
+    }
   }
 
   /**

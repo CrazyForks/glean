@@ -60,7 +60,18 @@ coverage.xml
 # Build outputs
 dist/
 build/
+# Allow electron build assets
+!frontend/apps/web/build/
 *.log
+
+# Electron
+dist-electron/
+release/
+*.dmg
+*.exe
+*.AppImage
+*.deb
+*.rpm
 
 # Environment
 .env
