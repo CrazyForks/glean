@@ -32,7 +32,7 @@ from glean_core.schemas.admin import (
     UserListItem,
     UserListResponse,
 )
-from glean_core.services import AdminService, SystemService
+from glean_core.services import AdminService, TypedConfigService
 from glean_database.session import get_session
 
 from ..config import settings
@@ -40,7 +40,7 @@ from ..dependencies import (
     get_admin_service,
     get_current_admin,
     get_redis_pool,
-    get_system_service,
+    get_typed_config_service,
 )
 
 router = APIRouter()
@@ -631,7 +631,6 @@ async def batch_entry_operation(
     return {"affected": count}
 
 
-<<<<<<< HEAD
 # =========================
 # Embedding configuration
 # =========================
@@ -984,19 +983,19 @@ async def get_embedding_status(
 @router.get("/settings/registration", response_model=dict[str, bool])
 async def get_registration_status(
     current_admin: Annotated[AdminUserResponse, Depends(get_current_admin)],
-    system_service: Annotated[SystemService, Depends(get_system_service)],
+    config_service: Annotated[TypedConfigService, Depends(get_typed_config_service)],
 ) -> dict[str, bool]:
     """
     Get registration enabled status.
 
     Args:
         current_admin: Current authenticated admin.
-        system_service: System service instance.
+        config_service: Typed config service instance.
 
     Returns:
         Registration status.
     """
-    enabled = await system_service.is_registration_enabled()
+    enabled = await config_service.is_registration_enabled()
     return {"enabled": enabled}
 
 
@@ -1004,7 +1003,7 @@ async def get_registration_status(
 async def set_registration_status(
     enabled: bool,
     current_admin: Annotated[AdminUserResponse, Depends(get_current_admin)],
-    system_service: Annotated[SystemService, Depends(get_system_service)],
+    config_service: Annotated[TypedConfigService, Depends(get_typed_config_service)],
 ) -> dict[str, bool]:
     """
     Set registration enabled status.
@@ -1012,10 +1011,10 @@ async def set_registration_status(
     Args:
         enabled: New status.
         current_admin: Current authenticated admin.
-        system_service: System service instance.
+        config_service: Typed config service instance.
 
     Returns:
         New registration status.
     """
-    await system_service.set_registration_enabled(enabled)
+    await config_service.set_registration_enabled(enabled)
     return {"enabled": enabled}

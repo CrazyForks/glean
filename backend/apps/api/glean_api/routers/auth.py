@@ -16,12 +16,12 @@ from glean_core.schemas import (
     UserResponse,
     UserUpdate,
 )
-from glean_core.services import AuthService, SystemService, UserService
+from glean_core.services import AuthService, TypedConfigService, UserService
 
 from ..dependencies import (
     get_auth_service,
     get_current_user,
-    get_system_service,
+    get_typed_config_service,
     get_user_service,
 )
 
@@ -32,7 +32,7 @@ router = APIRouter()
 async def register(
     data: RegisterRequest,
     auth_service: Annotated[AuthService, Depends(get_auth_service)],
-    system_service: Annotated[SystemService, Depends(get_system_service)],
+    config_service: Annotated[TypedConfigService, Depends(get_typed_config_service)],
 ) -> dict[str, UserResponse | TokenResponse]:
     """
     Register a new user account.
@@ -40,7 +40,7 @@ async def register(
     Args:
         data: User registration data.
         auth_service: Authentication service.
-        system_service: System service.
+        config_service: Typed config service.
 
     Returns:
         User profile and authentication tokens.
@@ -48,7 +48,7 @@ async def register(
     Raises:
         HTTPException: If email is already registered or registration is disabled.
     """
-    if not await system_service.is_registration_enabled():
+    if not await config_service.is_registration_enabled():
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Registration is currently disabled by the administrator",

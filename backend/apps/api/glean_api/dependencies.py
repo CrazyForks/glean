@@ -23,8 +23,8 @@ from glean_core.services import (
     FolderService,
     PreferenceService,
     SystemConfigService,
-    SystemService,
     TagService,
+    TypedConfigService,
     UserService,
 )
 from glean_database.session import get_session
@@ -218,11 +218,11 @@ async def get_score_service(
         return SimpleScoreService(session)
 
 
-def get_system_service(
+def get_typed_config_service(
     session: Annotated[AsyncSession, Depends(get_session)],
-) -> SystemService:
-    """Get system service instance."""
-    return SystemService(session)
+) -> TypedConfigService:
+    """Get typed config service instance."""
+    return TypedConfigService(session)
 
 
 async def get_current_admin(

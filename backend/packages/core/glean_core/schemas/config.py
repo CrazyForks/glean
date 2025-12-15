@@ -187,3 +187,15 @@ class ValidationResult(BaseModel):
     details: dict[str, Any] = Field(default_factory=dict)
 
 
+class RegistrationConfig(BaseModel):
+    """
+    User registration configuration.
+
+    Stored in system_configs table with key = NAMESPACE.
+    """
+
+    NAMESPACE: ClassVar[str] = "registration"
+
+    enabled: bool = True  # Registration enabled by default
+
+

@@ -303,3 +303,26 @@ class TypedConfigService:
             VectorizationStatus.REBUILDING,
         )
 
+    async def is_registration_enabled(self) -> bool:
+        """
+        Check if user registration is enabled.
+
+        Returns:
+            True if registration is enabled, False otherwise.
+        """
+        from glean_core.schemas.config import RegistrationConfig
+
+        config = await self.get(RegistrationConfig)
+        return config.enabled
+
+    async def set_registration_enabled(self, enabled: bool) -> None:
+        """
+        Set registration enabled status.
+
+        Args:
+            enabled: True to enable registration, False to disable.
+        """
+        from glean_core.schemas.config import RegistrationConfig
+
+        await self.update(RegistrationConfig, enabled=enabled)
+
