@@ -264,7 +264,7 @@ class AdminService:
         feeds = list(result.scalars().all())
 
         # Get subscriber counts for each feed
-        feed_data = []
+        feed_data: list[dict[str, Any]] = []
         for feed in feeds:
             sub_count_result = await self.session.execute(
                 select(func.count())

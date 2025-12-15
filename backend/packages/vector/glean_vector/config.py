@@ -96,7 +96,7 @@ def embedding_config_from_settings(data: dict[str, Any]) -> EmbeddingConfig:
     Expected keys: provider, model, dimension, api_key, base_url, rate_limit {default, providers},
     timeout, batch_size, max_retries.
     """
-    rate_limit = data.get("rate_limit") or {}
+    rate_limit: dict[str, Any] = data.get("rate_limit") or {}
     return EmbeddingConfig(
         provider=data.get("provider", embedding_config.provider),
         model=data.get("model", embedding_config.model),

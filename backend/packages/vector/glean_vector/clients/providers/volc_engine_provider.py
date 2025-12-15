@@ -78,11 +78,17 @@ class VolcEngineProvider(EmbeddingProvider):
 
             embedding = response.data[0].embedding
 
+            # Validate dimension matches expected
+            if not self.validate_dimension(embedding):
+                raise ValueError(
+                    f"Dimension mismatch: expected {self.dimension}, got {len(embedding)}"
+                )
+
             metadata = {
                 "model": response.model,
                 "total_tokens": response.usage.total_tokens if response.usage else 0,
                 "provider": self.provider_name,
-                "dimension": len(embedding),  # Include actual dimension in metadata
+                "dimension": len(embedding),
             }
 
             return embedding, metadata
@@ -116,12 +122,19 @@ class VolcEngineProvider(EmbeddingProvider):
             sorted_data = sorted(response.data, key=lambda x: x.index)
             embeddings = [item.embedding for item in sorted_data]
 
+            # Validate dimensions match expected
+            for i, emb in enumerate(embeddings):
+                if not self.validate_dimension(emb):
+                    raise ValueError(
+                        f"Dimension mismatch at index {i}: expected {self.dimension}, got {len(emb)}"
+                    )
+
             metadata = {
                 "model": response.model,
                 "total_tokens": response.usage.total_tokens if response.usage else 0,
                 "provider": self.provider_name,
                 "count": len(texts),
-                "dimension": len(embeddings[0]) if embeddings else 0,  # Include actual dimension
+                "dimension": len(embeddings[0]) if embeddings else 0,
             }
 
             return embeddings, metadata

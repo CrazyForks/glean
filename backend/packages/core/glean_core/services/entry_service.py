@@ -244,7 +244,7 @@ class EntryService:
             rows = result.all()
 
             # Build response items
-            items = []
+            items: list[EntryResponse] = []
             for entry, user_entry, bookmark_id, feed_title, feed_icon_url in rows:
                 items.append(
                     EntryResponse(

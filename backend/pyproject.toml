@@ -77,6 +77,5 @@ exclude = ["**/tests/**", "**/migrations/**", ".venv", "**/__pycache__"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-testpaths = ["tests", "apps/api/tests", "apps/worker/tests", "packages/rss/tests"]
 pythonpath = ["."]
-addopts = "-v --cov --cov-report=term-missing"
+addopts = "-v --cov --cov-report=term-missing --import-mode=importlib"

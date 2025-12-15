@@ -71,7 +71,7 @@ class PreferenceService:
 
         if stats:
             # Sort sources by affinity
-            source_scores = []
+            source_scores: list[dict[str, Any]] = []
             for feed_id, affinity in stats.source_affinity.items():
                 pos = affinity.get("positive", 0)
                 neg = affinity.get("negative", 0)
@@ -80,10 +80,10 @@ class PreferenceService:
                     score = (pos - neg) / total
                     source_scores.append({"feed_id": feed_id, "affinity_score": round(score, 2)})
 
-            top_sources_raw = sorted(
+            top_sources_raw: list[dict[str, Any]] = sorted(
                 source_scores,
                 key=lambda x: x["affinity_score"],
-                reverse=True,  # type: ignore[arg-type,return-value]
+                reverse=True,
             )[:5]
 
             # Fetch feed titles for top sources
@@ -105,7 +105,7 @@ class PreferenceService:
                 top_sources = []
 
             # Sort authors by affinity
-            author_scores = []
+            author_scores: list[dict[str, Any]] = []
             for author, affinity in stats.author_affinity.items():
                 pos = affinity.get("positive", 0)
                 neg = affinity.get("negative", 0)
@@ -114,7 +114,7 @@ class PreferenceService:
                     score = (pos - neg) / total
                     author_scores.append({"name": author, "affinity_score": round(score, 2)})
 
-            top_authors = sorted(author_scores, key=lambda x: x["affinity_score"], reverse=True)[:5]  # type: ignore[arg-type,return-value]
+            top_authors: list[dict[str, Any]] = sorted(author_scores, key=lambda x: x["affinity_score"], reverse=True)[:5]
 
         return {
             "total_likes": total_likes,

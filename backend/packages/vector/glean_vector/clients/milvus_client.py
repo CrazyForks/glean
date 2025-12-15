@@ -464,7 +464,7 @@ class MilvusClient:
         # Build filter expression
         expr = None
         if filters:
-            conditions = []
+            conditions: list[str] = []
             if "feed_id" in filters:
                 conditions.append(f'feed_id == "{self._escape_string(filters["feed_id"])}"')
             if "min_published_at" in filters:

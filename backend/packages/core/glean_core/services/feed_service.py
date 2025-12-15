@@ -66,7 +66,7 @@ class FeedService:
         subscriptions = result.scalars().all()
 
         # Calculate unread counts for each subscription
-        responses = []
+        responses: list[SubscriptionResponse] = []
         for sub in subscriptions:
             # Count entries in this feed that are either:
             # 1. Not in user_entries (never seen)
@@ -137,7 +137,7 @@ class FeedService:
             ETag string (MD5 hash).
         """
         # Build a string that uniquely identifies the current state
-        parts = []
+        parts: list[str] = []
         for sub in sorted(subscriptions, key=lambda s: s.id):
             parts.append(
                 f"{sub.id}:{sub.feed.last_fetched_at or ''}:{sub.unread_count}:"
@@ -207,7 +207,7 @@ class FeedService:
         subscriptions = result.scalars().all()
 
         # Calculate unread counts for each subscription
-        responses = []
+        responses: list[SubscriptionResponse] = []
         for sub in subscriptions:
             # Count entries in this feed that are either:
             # 1. Not in user_entries (never seen)

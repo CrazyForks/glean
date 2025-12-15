@@ -184,7 +184,7 @@ class SimpleScoreService:
         # Pre-fetch user stats once
         await self._get_user_stats(user_id)
 
-        results = {}
+        results: dict[str, dict[str, Any]] = {}
         for entry in entries:
             results[entry.id] = await self.calculate_score(user_id, entry)
 

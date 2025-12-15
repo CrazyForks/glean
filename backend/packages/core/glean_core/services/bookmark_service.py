@@ -119,7 +119,7 @@ class BookmarkService:
         bookmarks = result.scalars().unique().all()
 
         # Build response
-        items = []
+        items: list[BookmarkResponse] = []
         for bookmark in bookmarks:
             folders = [
                 BookmarkFolderSimple(id=bf.folder.id, name=bf.folder.name)
