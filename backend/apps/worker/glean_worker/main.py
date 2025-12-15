@@ -87,7 +87,9 @@ async def startup(ctx: dict[str, Any]) -> None:
     logger.info("Scheduled cron jobs:")
     for job in WorkerSettings.cron_jobs:
         # Extract function name and cron schedule from job
-        func_name = job.func.__name__ if hasattr(job, "func") else "unknown"
+        func_name = "unknown"
+        if hasattr(job, "coroutine") and hasattr(job.coroutine, "__name__"):
+            func_name = job.coroutine.__name__  # type: ignore[union-attr]
         minute = getattr(job, "minute", "unknown")
         logger.info(f"  - {func_name} (minute: {minute})")
     logger.info("=" * 60)

@@ -1,6 +1,7 @@
 """Configuration for vector services."""
 
 from pathlib import Path
+from typing import Any
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -88,7 +89,7 @@ preference_config = PreferenceConfig()
 score_config = ScoreConfig()
 
 
-def embedding_config_from_settings(data: dict) -> EmbeddingConfig:
+def embedding_config_from_settings(data: dict[str, Any]) -> EmbeddingConfig:
     """
     Build EmbeddingConfig from stored settings dict (system_settings).
 

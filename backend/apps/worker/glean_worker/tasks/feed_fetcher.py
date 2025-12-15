@@ -9,6 +9,7 @@ from typing import Any
 
 from arq import Retry
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from glean_core.schemas.config import EmbeddingConfig, VectorizationStatus
 from glean_core.services import TypedConfigService
@@ -17,7 +18,7 @@ from glean_database.session import get_session
 from glean_rss import fetch_feed, parse_feed
 
 
-async def _is_vectorization_enabled(session) -> bool:
+async def _is_vectorization_enabled(session: AsyncSession) -> bool:
     """Check if vectorization is enabled and healthy."""
     config_service = TypedConfigService(session)
     config = await config_service.get(EmbeddingConfig)

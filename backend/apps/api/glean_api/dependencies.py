@@ -178,7 +178,7 @@ async def get_preference_service(
 
 async def get_score_service(
     session: Annotated[AsyncSession, Depends(get_session)],
-):
+) -> object | None:
     """
     Get score service instance for real-time preference scoring.
 

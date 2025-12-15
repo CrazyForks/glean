@@ -6,7 +6,7 @@ Adds unique ID to each request and logs request information.
 
 import time
 import uuid
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -23,7 +23,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
     Adds unique ID to each request and logs request and response information.
     """
 
-    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         # Generate request ID
         request_id = str(uuid.uuid4())
 

@@ -6,7 +6,7 @@ Provides endpoints for administrative operations.
 
 from datetime import UTC, datetime, timedelta
 from math import ceil
-from typing import Annotated
+from typing import Annotated, Any
 
 from arq.connections import ArqRedis
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -835,7 +835,7 @@ async def disable_embedding(
 async def validate_embedding_config(
     current_admin: Annotated[AdminUserResponse, Depends(get_current_admin)],
     session: Annotated[AsyncSession, Depends(get_session)],
-) -> dict:
+) -> dict[str, Any]:
     """
     Test provider and Milvus connection without saving.
 
@@ -863,7 +863,7 @@ async def trigger_embedding_rebuild(
     current_admin: Annotated[AdminUserResponse, Depends(get_current_admin)],
     session: Annotated[AsyncSession, Depends(get_session)],
     redis_pool: Annotated[ArqRedis, Depends(get_redis_pool)],
-) -> dict:
+) -> dict[str, Any]:
     """
     Manually trigger embedding rebuild.
 
@@ -899,7 +899,7 @@ async def trigger_embedding_rebuild(
 async def cancel_embedding_rebuild(
     current_admin: Annotated[AdminUserResponse, Depends(get_current_admin)],
     session: Annotated[AsyncSession, Depends(get_session)],
-) -> dict:
+) -> dict[str, Any]:
     """
     Cancel ongoing embedding rebuild.
     """
@@ -931,7 +931,7 @@ async def get_embedding_status(
     current_admin: Annotated[AdminUserResponse, Depends(get_current_admin)],
     session: Annotated[AsyncSession, Depends(get_session)],
     admin_service: Annotated[AdminService, Depends(get_admin_service)],
-) -> dict:
+) -> dict[str, Any]:
     """
     Get embedding system status and rebuild progress.
 

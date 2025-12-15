@@ -102,23 +102,21 @@ class EmbeddingProviderFactory:
 
         # Add provider-specific config
         if provider in ("openai",) or provider in ("volc-engine", "volc_engine", "volcengine"):
-            base_config.update(
-                {
-                    "api_key": config.api_key,
-                    "base_url": config.base_url,
-                    "timeout": config.timeout,
-                    "max_retries": config.max_retries,
-                    "batch_size": config.batch_size,
-                }
-            )
+            openai_config: dict[str, str | int | None] = {
+                "api_key": config.api_key,
+                "base_url": config.base_url,
+                "timeout": config.timeout,
+                "max_retries": config.max_retries,
+                "batch_size": config.batch_size,
+            }
+            base_config.update(openai_config)  # type: ignore[arg-type]
         elif provider in ("sentence-transformers", "sentence_transformers"):
-            base_config.update(
-                {
-                    "device": None,  # Auto-detect
-                    "normalize_embeddings": True,
-                    "batch_size": config.batch_size,
-                }
-            )
+            st_config: dict[str, bool | int | None] = {
+                "device": None,  # Auto-detect
+                "normalize_embeddings": True,
+                "batch_size": config.batch_size,
+            }
+            base_config.update(st_config)  # type: ignore[arg-type]
 
         # Apply overrides
         base_config.update(overrides)
@@ -139,12 +137,12 @@ class EmbeddingProviderFactory:
             ...     pass
             >>> EmbeddingProviderFactory.register_provider("custom", CustomProvider)
         """
-        if not issubclass(provider_class, EmbeddingProvider):
+        if not issubclass(provider_class, EmbeddingProvider):  # type: ignore[reportUnnecessaryIsInstance]
             raise TypeError(
                 f"Provider class must inherit from EmbeddingProvider, got {provider_class.__name__}"
             )
 
-        cls._PROVIDERS[name.lower()] = provider_class
+        cls._PROVIDERS[name.lower()] = provider_class  # type: ignore[assignment]
 
     @classmethod
     def list_providers(cls) -> list[str]:

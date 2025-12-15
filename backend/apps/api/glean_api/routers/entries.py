@@ -67,7 +67,7 @@ async def list_entries(
         page=page,
         per_page=per_page,
         view=view,
-        score_service=score_service,
+        score_service=score_service,  # type: ignore[arg-type]
     )
 
 

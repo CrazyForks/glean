@@ -4,6 +4,8 @@ UserPreferenceStats model definition.
 This module defines the UserPreferenceStats model for storing user preference statistics.
 """
 
+from typing import Any
+
 from sqlalchemy import Float, ForeignKey, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -46,8 +48,8 @@ class UserPreferenceStats(Base, TimestampMixin):
 
     # Affinity mappings (JSON)
     # Format: {"feed_uuid": {"positive": 5, "negative": 1}}
-    source_affinity: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
-    author_affinity: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
+    source_affinity: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)
+    author_affinity: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)
 
     # Relationships
     user = relationship("User", back_populates="preference_stats")

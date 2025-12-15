@@ -47,10 +47,10 @@ class EmbeddingConfig(BaseModel):
     dimension: int = Field(1536, gt=0, le=10000)
     api_key: str | None = None
     base_url: str | None = None
-    timeout: int = Field(30, gt=0, le=300)
-    batch_size: int = Field(20, gt=0, le=1000)
-    max_retries: int = Field(3, ge=0, le=10)
-    rate_limit: RateLimitConfig = Field(default_factory=RateLimitConfig)
+    timeout: int = Field(default=30, gt=0, le=300)
+    batch_size: int = Field(default=20, gt=0, le=1000)
+    max_retries: int = Field(default=3, ge=0, le=10)
+    rate_limit: RateLimitConfig = Field(default_factory=RateLimitConfig)  # type: ignore[arg-type]
 
     # System state
     status: VectorizationStatus = VectorizationStatus.DISABLED

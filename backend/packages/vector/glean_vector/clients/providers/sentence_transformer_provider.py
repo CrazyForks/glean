@@ -219,9 +219,12 @@ class SentenceTransformerProvider(EmbeddingProvider):
                 self.device = actual_device
 
                 # Verify and update dimension
-                test_embedding = self._model.encode(
-                    "test", convert_to_numpy=True, normalize_embeddings=self.normalize
-                )
+                if self._model is not None:
+                    test_embedding = self._model.encode(
+                        "test", convert_to_numpy=True, normalize_embeddings=self.normalize
+                    )
+                else:
+                    raise RuntimeError("Model failed to load")
                 actual_dim = (
                     len(test_embedding) if test_embedding.ndim == 1 else test_embedding.shape[-1]
                 )

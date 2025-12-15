@@ -2,6 +2,8 @@
 
 from typing import Any
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from glean_core import get_logger
 from glean_core.schemas.config import EmbeddingConfig, VectorizationStatus
 from glean_core.services import TypedConfigService
@@ -17,7 +19,7 @@ logger = get_logger(__name__)
 CONSECUTIVE_FAILURES_THRESHOLD = 5
 
 
-async def _check_vectorization_enabled(session) -> tuple[bool, EmbeddingConfig]:
+async def _check_vectorization_enabled(session: AsyncSession) -> tuple[bool, EmbeddingConfig]:
     """
     Check if vectorization is enabled and healthy.
 
@@ -57,7 +59,7 @@ async def _load_embedding_settings(config: EmbeddingConfig) -> tuple[EmbeddingSe
     return settings, rate_limit
 
 
-async def _handle_embedding_error(session, error: Exception) -> None:
+async def _handle_embedding_error(session: AsyncSession, error: Exception) -> None:
     """
     Handle embedding error with circuit breaker logic.
 
@@ -80,7 +82,7 @@ async def _handle_embedding_error(session, error: Exception) -> None:
         await config_service.update(EmbeddingConfig, error_count=new_error_count)
 
 
-async def _reset_error_count(session) -> None:
+async def _reset_error_count(session: AsyncSession) -> None:
     """Reset error count on successful operation."""
     config_service = TypedConfigService(session)
     config = await config_service.get(EmbeddingConfig)
@@ -145,7 +147,7 @@ async def generate_entry_embedding(ctx: dict[str, Any], entry_id: str) -> dict[s
     return {"success": False, "entry_id": entry_id, "error": "No database session"}
 
 
-async def batch_generate_embeddings(ctx: dict[str, Any], limit: int = 100) -> dict[str, int]:
+async def batch_generate_embeddings(ctx: dict[str, Any], limit: int = 100) -> dict[str, int | str]:
     """
     Batch generate embeddings for pending entries.
 
@@ -188,7 +190,7 @@ async def batch_generate_embeddings(ctx: dict[str, Any], limit: int = 100) -> di
                 # Reset error count on successful batch
                 await _reset_error_count(session)
 
-            return result
+            return result  # type: ignore[return-value]
 
         except Exception as e:
             logger.error(f"Failed to batch generate embeddings: {e}")
@@ -201,7 +203,7 @@ async def batch_generate_embeddings(ctx: dict[str, Any], limit: int = 100) -> di
     return {"processed": 0, "failed": 0}
 
 
-async def retry_failed_embeddings(ctx: dict[str, Any], limit: int = 50) -> dict[str, int]:
+async def retry_failed_embeddings(ctx: dict[str, Any], limit: int = 50) -> dict[str, int | str]:
     """
     Retry failed embeddings.
 
@@ -243,7 +245,7 @@ async def retry_failed_embeddings(ctx: dict[str, Any], limit: int = 50) -> dict[
             if result.get("processed", 0) > 0:
                 await _reset_error_count(session)
 
-            return result
+            return result  # type: ignore[return-value]
 
         except Exception as e:
             logger.error(f"Failed to retry failed embeddings: {e}")

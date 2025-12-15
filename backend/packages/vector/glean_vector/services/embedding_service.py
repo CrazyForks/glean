@@ -129,7 +129,7 @@ class EmbeddingService:
                 return False
 
             # Generate embedding
-            embedding, metadata = await self.embedding_client.generate_embedding(text)
+            embedding, _ = await self.embedding_client.generate_embedding(text)
 
             # Detect language (simple heuristic)
             language = self._detect_language(text)

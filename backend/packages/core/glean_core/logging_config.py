@@ -49,14 +49,24 @@ def setup_logging(
             )
 
     # Console handler
-    logger.add(
-        sys.stderr,
-        format=log_format,
-        level=log_level,
-        colorize=True,
-        backtrace=True,
-        diagnose=True,
-    )
+    if log_format is not None:
+        logger.add(
+            sys.stderr,
+            format=log_format,
+            level=log_level,
+            colorize=True,
+            backtrace=True,
+            diagnose=True,
+        )
+    else:
+        logger.add(
+            sys.stderr,
+            level=log_level,
+            colorize=True,
+            backtrace=True,
+            diagnose=True,
+            serialize=True,
+        )
 
     # File handler
     if log_file:
@@ -64,31 +74,55 @@ def setup_logging(
         log_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Regular log file
-        logger.add(
-            log_file,
-            format=log_format,
-            level=log_level,
-            rotation=rotation,
-            retention=retention,
-            compression=compression,
-            serialize=serialize,
-            backtrace=True,
-            diagnose=True,
-        )
+        if log_format is not None:
+            logger.add(
+                log_file,
+                format=log_format,
+                level=log_level,
+                rotation=rotation,
+                retention=retention,
+                compression=compression,
+                serialize=serialize,
+                backtrace=True,
+                diagnose=True,
+            )
+        else:
+            logger.add(
+                log_file,
+                level=log_level,
+                rotation=rotation,
+                retention=retention,
+                compression=compression,
+                serialize=True,
+                backtrace=True,
+                diagnose=True,
+            )
 
         # Error log separate file
         error_log_file = log_path.parent / f"{log_path.stem}_error{log_path.suffix}"
-        logger.add(
-            str(error_log_file),
-            format=log_format,
-            level="ERROR",
-            rotation=rotation,
-            retention=retention,
-            compression=compression,
-            serialize=serialize,
-            backtrace=True,
-            diagnose=True,
-        )
+        if log_format is not None:
+            logger.add(
+                str(error_log_file),
+                format=log_format,
+                level="ERROR",
+                rotation=rotation,
+                retention=retention,
+                compression=compression,
+                serialize=serialize,
+                backtrace=True,
+                diagnose=True,
+            )
+        else:
+            logger.add(
+                str(error_log_file),
+                level="ERROR",
+                rotation=rotation,
+                retention=retention,
+                compression=compression,
+                serialize=True,
+                backtrace=True,
+                diagnose=True,
+            )
 
 
 def setup_logging_from_env() -> None:
@@ -128,7 +162,6 @@ def intercept_standard_logging() -> None:
     Intercept standard logging module logs and output them through Loguru.
     """
     import logging
-    import logging.handlers
 
     class InterceptHandler(logging.Handler):
         """Intercept standard logging logs and forward to Loguru."""
@@ -142,7 +175,7 @@ def intercept_standard_logging() -> None:
 
             # Find caller
             frame, depth = logging.currentframe(), 0
-            while frame and depth < 5:
+            while frame is not None and depth < 5:
                 filename = frame.f_code.co_filename
                 is_logging = filename == logging.__file__
                 is_frozen = "importlib" in filename and "_bootstrap" in filename
@@ -175,8 +208,11 @@ def get_logger(name: str | None = None):
         # Automatically get calling module name
         import inspect
 
-        frame = inspect.currentframe().f_back
-        name = frame.f_globals.get("__name__", "unknown")
+        frame = inspect.currentframe()
+        if frame is not None and frame.f_back is not None:
+            name = frame.f_back.f_globals.get("__name__", "unknown")
+        else:
+            name = "unknown"
 
     return logger.bind(name=name)
 

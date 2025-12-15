@@ -131,7 +131,7 @@ class MilvusClient:
             expected_signature = self._build_model_signature(provider, model, dimension)
 
         # Check entries collection
-        if utility.has_collection(self.config.entries_collection):
+        if utility.has_collection(self.config.entries_collection):  # type: ignore[truthy-function]
             collection = Collection(self.config.entries_collection)
 
             # Check if model has changed
@@ -143,12 +143,12 @@ class MilvusClient:
                     return
 
             self._entries_collection = collection
-            self._entries_collection.load()
+            self._entries_collection.load()  # type: ignore[unused-coroutine]
         else:
             self._entries_collection = self._create_entries_collection(dimension, provider, model)
 
         # Check preferences collection
-        if utility.has_collection(self.config.prefs_collection):
+        if utility.has_collection(self.config.prefs_collection):  # type: ignore[truthy-function]
             collection = Collection(self.config.prefs_collection)
 
             # Check if model has changed
@@ -160,7 +160,7 @@ class MilvusClient:
                     return
 
             self._prefs_collection = collection
-            self._prefs_collection.load()
+            self._prefs_collection.load()  # type: ignore[unused-coroutine]
         else:
             self._prefs_collection = self._create_user_preferences_collection(
                 dimension, provider, model
@@ -180,11 +180,11 @@ class MilvusClient:
         self.connect()
 
         # Drop existing collections if present
-        if utility.has_collection(self.config.entries_collection):
-            utility.drop_collection(self.config.entries_collection)
+        if utility.has_collection(self.config.entries_collection):  # type: ignore[truthy-function]
+            utility.drop_collection(self.config.entries_collection)  # type: ignore[unused-coroutine]
             # Wait for drop to complete with longer timeout
             for i in range(30):  # Increased from 10 to 30
-                if not utility.has_collection(self.config.entries_collection):
+                if not utility.has_collection(self.config.entries_collection):  # type: ignore[truthy-function]
                     break
                 await asyncio.sleep(0.2)  # Non-blocking async sleep
                 if i == 29:
@@ -192,11 +192,11 @@ class MilvusClient:
                         f"Timeout waiting for collection {self.config.entries_collection} to drop"
                     )
 
-        if utility.has_collection(self.config.prefs_collection):
-            utility.drop_collection(self.config.prefs_collection)
+        if utility.has_collection(self.config.prefs_collection):  # type: ignore[truthy-function]
+            utility.drop_collection(self.config.prefs_collection)  # type: ignore[unused-coroutine]
             # Wait for drop to complete with longer timeout
             for i in range(30):  # Increased from 10 to 30
-                if not utility.has_collection(self.config.prefs_collection):
+                if not utility.has_collection(self.config.prefs_collection):  # type: ignore[truthy-function]
                     break
                 await asyncio.sleep(0.2)  # Non-blocking async sleep
                 if i == 29:
@@ -228,13 +228,13 @@ class MilvusClient:
             Created collection
         """
         # If collection already exists with same signature, just load and return it
-        if utility.has_collection(self.config.entries_collection):
+        if utility.has_collection(self.config.entries_collection):  # type: ignore[truthy-function]
             existing_collection = Collection(self.config.entries_collection)
             if provider and model:
                 existing_signature = self._extract_model_signature(existing_collection)
                 expected_signature = self._build_model_signature(provider, model, dimension)
                 if existing_signature == expected_signature:
-                    existing_collection.load()
+                    existing_collection.load()  # type: ignore[unused-coroutine]
                     return existing_collection
             # If signatures don't match or no signature check, we have a problem
             # This shouldn't happen if recreate_collections worked properly
@@ -262,7 +262,7 @@ class MilvusClient:
         collection = Collection(name=self.config.entries_collection, schema=schema)
 
         # Create index for vector search
-        collection.create_index(
+        collection.create_index(  # type: ignore[unused-coroutine]
             "embedding",
             {"index_type": "IVF_FLAT", "metric_type": "COSINE", "params": {"nlist": 1024}},
         )
@@ -273,16 +273,16 @@ class MilvusClient:
             existing_indexes = {idx.field_name: idx for idx in collection.indexes}
 
             if "feed_id" not in existing_indexes:
-                collection.create_index("feed_id", index_name="idx_feed_id")
+                collection.create_index("feed_id", index_name="idx_feed_id")  # type: ignore[unused-coroutine]
 
             if "published_at" not in existing_indexes:
-                collection.create_index("published_at", index_name="idx_published_at")
+                collection.create_index("published_at", index_name="idx_published_at")  # type: ignore[unused-coroutine]
         except MilvusException as e:
             # If index creation fails, log but don't fail the whole operation
             # Indexes are optional for basic functionality
             print(f"Warning: Failed to create scalar indexes: {e}")
 
-        collection.load()
+        collection.load()  # type: ignore[unused-coroutine]
         return collection
 
     def _create_user_preferences_collection(
@@ -300,13 +300,13 @@ class MilvusClient:
             Created collection
         """
         # If collection already exists with same signature, just load and return it
-        if utility.has_collection(self.config.prefs_collection):
+        if utility.has_collection(self.config.prefs_collection):  # type: ignore[truthy-function]
             existing_collection = Collection(self.config.prefs_collection)
             if provider and model:
                 existing_signature = self._extract_model_signature(existing_collection)
                 expected_signature = self._build_model_signature(provider, model, dimension)
                 if existing_signature == expected_signature:
-                    existing_collection.load()
+                    existing_collection.load()  # type: ignore[unused-coroutine]
                     return existing_collection
             # If signatures don't match or no signature check, we have a problem
             raise RuntimeError(
@@ -332,7 +332,7 @@ class MilvusClient:
         collection = Collection(name=self.config.prefs_collection, schema=schema)
 
         # Simple FLAT index for small preference set
-        collection.create_index("embedding", {"index_type": "FLAT", "metric_type": "COSINE"})
+        collection.create_index("embedding", {"index_type": "FLAT", "metric_type": "COSINE"})  # type: ignore[unused-coroutine]
 
         # Create index for user_id with error handling
         try:
@@ -340,7 +340,7 @@ class MilvusClient:
             existing_indexes = {idx.field_name: idx for idx in collection.indexes}
 
             if "user_id" not in existing_indexes:
-                collection.create_index("user_id", index_name="idx_user_id")
+                collection.create_index("user_id", index_name="idx_user_id")  # type: ignore[unused-coroutine]
         except MilvusException as e:
             # If index creation fails, log but don't fail the whole operation
             print(f"Warning: Failed to create user_id index: {e}")
@@ -407,12 +407,12 @@ class MilvusClient:
         if not self._entries_collection:
             raise RuntimeError("Collections not initialized. Call ensure_collections() first.")
 
-        results = self._entries_collection.query(
+        results = self._entries_collection.query(  # type: ignore[assignment]
             expr=f'id == "{self._escape_string(entry_id)}"', output_fields=["embedding"]
         )
 
-        if results:
-            return results[0]["embedding"]
+        if results:  # type: ignore[truthy-function]
+            return results[0]["embedding"]  # type: ignore[index]
         return None
 
     async def batch_get_entry_embeddings(self, entry_ids: list[str]) -> dict[str, list[float]]:
@@ -435,9 +435,9 @@ class MilvusClient:
         ids_str = ", ".join(f'"{self._escape_string(eid)}"' for eid in entry_ids)
         expr = f"id in [{ids_str}]"
 
-        results = self._entries_collection.query(expr=expr, output_fields=["id", "embedding"])
+        results = self._entries_collection.query(expr=expr, output_fields=["id", "embedding"])  # type: ignore[assignment]
 
-        return {result["id"]: result["embedding"] for result in results}
+        return {result["id"]: result["embedding"] for result in results}  # type: ignore[misc]
 
     async def search_similar_entries(
         self,
@@ -473,7 +473,7 @@ class MilvusClient:
             if conditions:
                 expr = " && ".join(conditions)
 
-        results = self._entries_collection.search(
+        results = self._entries_collection.search(  # type: ignore[assignment]
             data=[query_vector],
             anns_field="embedding",
             param=search_params,
@@ -484,13 +484,13 @@ class MilvusClient:
 
         return [
             {
-                "id": hit.id,
-                "score": hit.score,
-                "feed_id": hit.entity.get("feed_id"),
-                "published_at": hit.entity.get("published_at"),
-                "author": hit.entity.get("author"),
+                "id": hit.id,  # type: ignore[misc]
+                "score": hit.score,  # type: ignore[misc]
+                "feed_id": hit.entity.get("feed_id"),  # type: ignore[misc]
+                "published_at": hit.entity.get("published_at"),  # type: ignore[misc]
+                "author": hit.entity.get("author"),  # type: ignore[misc]
             }
-            for hit in results[0]
+            for hit in results[0]  # type: ignore[index]
         ]
 
     async def upsert_user_preference(
@@ -517,7 +517,7 @@ class MilvusClient:
         pref_id = f"{user_id}_{vector_type}"
 
         # Delete existing if present
-        self._prefs_collection.delete(expr=f'id == "{self._escape_string(pref_id)}"')
+        self._prefs_collection.delete(expr=f'id == "{self._escape_string(pref_id)}"')  # type: ignore[unused-coroutine]
 
         # Insert new
         data = [
@@ -544,18 +544,18 @@ class MilvusClient:
         if not self._prefs_collection:
             raise RuntimeError("Collections not initialized. Call ensure_collections() first.")
 
-        results = self._prefs_collection.query(
+        results = self._prefs_collection.query(  # type: ignore[assignment]
             expr=f'user_id == "{self._escape_string(user_id)}"',
             output_fields=["vector_type", "embedding", "sample_count", "updated_at"],
         )
 
         prefs: dict[str, dict[str, Any]] = {}
-        for result in results:
-            vector_type = result["vector_type"]
+        for result in results:  # type: ignore[misc]
+            vector_type = result["vector_type"]  # type: ignore[index]
             prefs[vector_type] = {
-                "embedding": result["embedding"],
-                "sample_count": result["sample_count"],
-                "updated_at": result["updated_at"],
+                "embedding": result["embedding"],  # type: ignore[index]
+                "sample_count": result["sample_count"],  # type: ignore[index]
+                "updated_at": result["updated_at"],  # type: ignore[index]
             }
 
         return prefs
@@ -570,7 +570,7 @@ class MilvusClient:
         if not self._entries_collection:
             raise RuntimeError("Collections not initialized. Call ensure_collections() first.")
 
-        self._entries_collection.delete(expr=f'id == "{self._escape_string(entry_id)}"')
+        self._entries_collection.delete(expr=f'id == "{self._escape_string(entry_id)}"')  # type: ignore[unused-coroutine]
 
     async def delete_user_preferences(self, user_id: str) -> None:
         """
@@ -582,4 +582,4 @@ class MilvusClient:
         if not self._prefs_collection:
             raise RuntimeError("Collections not initialized. Call ensure_collections() first.")
 
-        self._prefs_collection.delete(expr=f'user_id == "{self._escape_string(user_id)}"')
+        self._prefs_collection.delete(expr=f'user_id == "{self._escape_string(user_id)}"')  # type: ignore[unused-coroutine]
