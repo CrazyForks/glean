@@ -5,7 +5,6 @@ Provides validation for embedding providers and Milvus connections
 before enabling vectorization.
 """
 
-
 from glean_core import get_logger
 from glean_core.schemas.config import EmbeddingConfig, ValidationResult
 
@@ -130,9 +129,7 @@ class EmbeddingValidationService:
                         },
                     )
 
-                logger.info(
-                    f"Provider validation successful: {config.provider}/{config.model}"
-                )
+                logger.info(f"Provider validation successful: {config.provider}/{config.model}")
                 return ValidationResult(
                     success=True,
                     message="Provider connection successful",
@@ -312,5 +309,3 @@ class EmbeddingValidationService:
         """
         result = await self.validate_milvus()
         return result.success
-
-

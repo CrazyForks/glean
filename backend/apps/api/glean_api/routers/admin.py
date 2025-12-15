@@ -98,9 +98,7 @@ async def admin_login(
         "iat": int(now.timestamp()),
     }
 
-    access_token = jwt.encode(
-        access_payload, settings.secret_key, algorithm=settings.jwt_algorithm
-    )
+    access_token = jwt.encode(access_payload, settings.secret_key, algorithm=settings.jwt_algorithm)
     refresh_token = jwt.encode(
         refresh_payload, settings.secret_key, algorithm=settings.jwt_algorithm
     )
@@ -180,9 +178,7 @@ async def admin_refresh_token(
 
         # Generate new tokens
         now = datetime.now(UTC)
-        access_expire = now + timedelta(
-            minutes=settings.jwt_access_token_expire_minutes
-        )
+        access_expire = now + timedelta(minutes=settings.jwt_access_token_expire_minutes)
         refresh_expire = now + timedelta(days=settings.jwt_refresh_token_expire_days)
 
         # Handle both enum (in-memory) and string (from database) cases
@@ -759,9 +755,7 @@ async def update_embedding_config(
     if updated.enabled and config_changed:
         # Generate new version and trigger rebuild
         await config_service.update_embedding_version()
-        await config_service.update(
-            EmbeddingConfig, status=VectorizationStatus.VALIDATING
-        )
+        await config_service.update(EmbeddingConfig, status=VectorizationStatus.VALIDATING)
         await redis_pool.enqueue_job("validate_and_rebuild_embeddings")
 
     return TypedEmbeddingConfigResponse.from_config(updated)

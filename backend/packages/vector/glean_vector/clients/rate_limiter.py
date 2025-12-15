@@ -33,4 +33,3 @@ class RateLimiter:
                 self._timestamps = [ts for ts in self._timestamps if ts > window_start]
 
             self._timestamps.append(time.time())
-

@@ -123,9 +123,7 @@ class EntryService:
         feed_ids = [row[0] for row in result.all()]
 
         if not feed_ids:
-            return EntryListResponse(
-                items=[], total=0, page=page, per_page=per_page, total_pages=0
-            )
+            return EntryListResponse(items=[], total=0, page=page, per_page=per_page, total_pages=0)
 
         # Subquery to get bookmark_id for entry (limit 1 in case of duplicates)
         bookmark_id_subq = (
@@ -176,9 +174,7 @@ class EntryService:
         if view == "smart" and score_service:
             # Fetch more entries for scoring (we'll limit after sorting)
             fetch_limit = min(total, per_page * 5)  # Fetch 5 pages worth for scoring
-            stmt_for_scoring = stmt.order_by(desc(Entry.published_at)).limit(
-                fetch_limit
-            )
+            stmt_for_scoring = stmt.order_by(desc(Entry.published_at)).limit(fetch_limit)
 
             result = await self.session.execute(stmt_for_scoring)
             all_rows = result.all()
@@ -190,9 +186,7 @@ class EntryService:
             # Both ScoreService and SimpleScoreService implement batch_calculate_scores
             # ScoreService returns dict[entry_id, float]
             # SimpleScoreService returns dict[entry_id, dict with 'score' key]
-            scores_result = await score_service.batch_calculate_scores(
-                user_id, entries_for_scoring
-            )
+            scores_result = await score_service.batch_calculate_scores(user_id, entries_for_scoring)
 
             # Normalize to dict[str, float]
             scores: dict[str, float] = {}
@@ -221,9 +215,7 @@ class EntryService:
                     is_read=bool(user_entry.is_read) if user_entry else False,
                     is_liked=user_entry.is_liked if user_entry else None,
                     read_later=bool(user_entry.read_later) if user_entry else False,
-                    read_later_until=(
-                        user_entry.read_later_until if user_entry else None
-                    ),
+                    read_later_until=(user_entry.read_later_until if user_entry else None),
                     read_at=user_entry.read_at if user_entry else None,
                     is_bookmarked=bookmark_id is not None,
                     bookmark_id=str(bookmark_id) if bookmark_id else None,
@@ -268,9 +260,7 @@ class EntryService:
                         is_read=bool(user_entry.is_read) if user_entry else False,
                         is_liked=user_entry.is_liked if user_entry else None,
                         read_later=bool(user_entry.read_later) if user_entry else False,
-                        read_later_until=(
-                            user_entry.read_later_until if user_entry else None
-                        ),
+                        read_later_until=(user_entry.read_later_until if user_entry else None),
                         read_at=user_entry.read_at if user_entry else None,
                         is_bookmarked=bookmark_id is not None,
                         bookmark_id=str(bookmark_id) if bookmark_id else None,

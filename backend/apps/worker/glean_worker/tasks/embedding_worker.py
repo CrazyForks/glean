@@ -70,9 +70,7 @@ async def _handle_embedding_error(session, error: Exception) -> None:
 
     if new_error_count >= CONSECUTIVE_FAILURES_THRESHOLD:
         # Circuit breaker: set status to ERROR
-        logger.warning(
-            f"Circuit breaker triggered after {new_error_count} consecutive failures"
-        )
+        logger.warning(f"Circuit breaker triggered after {new_error_count} consecutive failures")
         await config_service.set_embedding_status(
             VectorizationStatus.ERROR.value,
             error=f"Circuit breaker: {str(error)}",
@@ -147,9 +145,7 @@ async def generate_entry_embedding(ctx: dict[str, Any], entry_id: str) -> dict[s
     return {"success": False, "entry_id": entry_id, "error": "No database session"}
 
 
-async def batch_generate_embeddings(
-    ctx: dict[str, Any], limit: int = 100
-) -> dict[str, int]:
+async def batch_generate_embeddings(ctx: dict[str, Any], limit: int = 100) -> dict[str, int]:
     """
     Batch generate embeddings for pending entries.
 
@@ -205,9 +201,7 @@ async def batch_generate_embeddings(
     return {"processed": 0, "failed": 0}
 
 
-async def retry_failed_embeddings(
-    ctx: dict[str, Any], limit: int = 50
-) -> dict[str, int]:
+async def retry_failed_embeddings(ctx: dict[str, Any], limit: int = 50) -> dict[str, int]:
     """
     Retry failed embeddings.
 

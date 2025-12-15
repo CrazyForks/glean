@@ -26,7 +26,9 @@ class SystemConfigService:
         row = result.scalar_one_or_none()
         return row.value if row else None
 
-    async def set_config(self, key: str, value: dict[str, Any], description: str | None = None) -> None:
+    async def set_config(
+        self, key: str, value: dict[str, Any], description: str | None = None
+    ) -> None:
         """Upsert config value."""
         result = await self.session.execute(select(SystemConfig).where(SystemConfig.key == key))
         existing = result.scalar_one_or_none()
@@ -39,4 +41,3 @@ class SystemConfigService:
             self.session.add(SystemConfig(key=key, value=value, description=description))
 
         await self.session.commit()
-

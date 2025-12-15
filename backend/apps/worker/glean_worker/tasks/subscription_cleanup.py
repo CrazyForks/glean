@@ -47,8 +47,7 @@ async def cleanup_orphan_embeddings(
             failed_count += 1
 
     logger.info(
-        f"Cleaned up embeddings for feed {feed_id}: "
-        f"deleted={deleted_count}, failed={failed_count}"
+        f"Cleaned up embeddings for feed {feed_id}: deleted={deleted_count}, failed={failed_count}"
     )
 
     return {
@@ -57,4 +56,3 @@ async def cleanup_orphan_embeddings(
         "deleted": deleted_count,
         "failed": failed_count,
     }
-

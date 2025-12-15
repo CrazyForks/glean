@@ -74,9 +74,7 @@ class SimpleScoreService:
             days_over_week = (age_hours - 168) / 24
             return max(0.0, 0.5 - days_over_week * 0.02)
 
-    def _get_source_affinity(
-        self, stats: UserPreferenceStats | None, feed_id: str
-    ) -> float:
+    def _get_source_affinity(self, stats: UserPreferenceStats | None, feed_id: str) -> float:
         """
         Get source affinity score for a feed.
 
@@ -98,9 +96,7 @@ class SimpleScoreService:
         ratio = (positive + 1) / (total + 2)  # Add-1 smoothing
         return ratio
 
-    def _get_author_affinity(
-        self, stats: UserPreferenceStats | None, author: str | None
-    ) -> float:
+    def _get_author_affinity(self, stats: UserPreferenceStats | None, author: str | None) -> float:
         """
         Get author affinity score.
 
@@ -222,4 +218,3 @@ class SimpleScoreService:
             "top_authors_count": len(stats.author_affinity),
             "method": "simple",
         }
-

@@ -32,9 +32,7 @@ class PreferenceStats(BaseModel):
     total_likes: int
     total_dislikes: int
     total_bookmarks: int
-    preference_strength: str = Field(
-        ..., description="weak, moderate, or strong"
-    )
+    preference_strength: str = Field(..., description="weak, moderate, or strong")
     top_sources: list[dict] = Field(default_factory=list)
     top_authors: list[dict] = Field(default_factory=list)
     model_updated_at: datetime | None = None

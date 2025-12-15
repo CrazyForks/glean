@@ -142,9 +142,7 @@ async def test_generate_embeddings_batch_success(volc_config, mock_ark_response_
         assert metadata["count"] == 3
 
         # Verify API was called correctly
-        mock_client.embeddings.create.assert_called_once_with(
-            model="doubao-embedding", input=texts
-        )
+        mock_client.embeddings.create.assert_called_once_with(model="doubao-embedding", input=texts)
 
     await provider.close()
 
@@ -193,9 +191,7 @@ async def test_dimension_validation_failure(volc_config):
 @pytest.mark.asyncio
 async def test_provider_name():
     """Test provider name property."""
-    provider = VolcEngineProvider(
-        model="doubao-embedding", dimension=1024, api_key="test"
-    )
+    provider = VolcEngineProvider(model="doubao-embedding", dimension=1024, api_key="test")
 
     assert provider.provider_name == "volc_engine"
 
@@ -297,7 +293,7 @@ async def test_volcengine_manual_integration():
         model=model,
         dimension=dimension,
         api_key=api_key,
-        batch_size=2  # Use smaller batch for testing
+        batch_size=2,  # Use smaller batch for testing
     )
 
     try:
@@ -318,7 +314,9 @@ async def test_volcengine_manual_integration():
         assert metadata_en["total_tokens"] > 0
         assert metadata_en["model"] == model
 
-        print(f"English embedding: dimension={len(embedding_en)}, tokens={metadata_en['total_tokens']}")
+        print(
+            f"English embedding: dimension={len(embedding_en)}, tokens={metadata_en['total_tokens']}"
+        )
 
         # Test with Chinese text
         chinese_text = "这是一个用于测试火山引擎向量生成的中文句子。"
@@ -328,14 +326,12 @@ async def test_volcengine_manual_integration():
         assert metadata_zh["provider"] == "volc_engine"
         assert metadata_zh["total_tokens"] > 0
 
-        print(f"Chinese embedding: dimension={len(embedding_zh)}, tokens={metadata_zh['total_tokens']}")
+        print(
+            f"Chinese embedding: dimension={len(embedding_zh)}, tokens={metadata_zh['total_tokens']}"
+        )
 
         # Test batch processing with mixed languages
-        mixed_texts = [
-            "First English sentence",
-            "第二个中文句子",
-            "Third English sentence"
-        ]
+        mixed_texts = ["First English sentence", "第二个中文句子", "Third English sentence"]
 
         embeddings_batch, metadata_batch = await provider.generate_embeddings_batch(mixed_texts)
 
@@ -344,7 +340,9 @@ async def test_volcengine_manual_integration():
         assert metadata_batch["count"] == 3
         assert metadata_batch["total_tokens"] > 0
 
-        print(f"Batch embeddings: count={len(embeddings_batch)}, total_tokens={metadata_batch['total_tokens']}")
+        print(
+            f"Batch embeddings: count={len(embeddings_batch)}, total_tokens={metadata_batch['total_tokens']}"
+        )
 
         # Verify embeddings are different for different texts
         try:

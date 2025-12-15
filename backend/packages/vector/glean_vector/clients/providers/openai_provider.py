@@ -90,9 +90,7 @@ class OpenAIProvider(EmbeddingProvider):
     ) -> tuple[list[list[float]], dict[str, Any]]:
         """Generate embeddings for multiple texts."""
         if len(texts) > self.batch_size:
-            raise ValueError(
-                f"Batch size {len(texts)} exceeds limit {self.batch_size}"
-            )
+            raise ValueError(f"Batch size {len(texts)} exceeds limit {self.batch_size}")
 
         return await self._generate_batch_with_retry(texts)
 

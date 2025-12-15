@@ -250,9 +250,7 @@ async def delete_subscription(
 
         # Queue Milvus embedding cleanup if feed was orphaned
         if orphaned_feed_id and entry_ids:
-            await redis.enqueue_job(
-                "cleanup_orphan_embeddings", orphaned_feed_id, entry_ids
-            )
+            await redis.enqueue_job("cleanup_orphan_embeddings", orphaned_feed_id, entry_ids)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from None
 

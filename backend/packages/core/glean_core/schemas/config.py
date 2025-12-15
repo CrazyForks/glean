@@ -197,5 +197,3 @@ class RegistrationConfig(BaseModel):
     NAMESPACE: ClassVar[str] = "registration"
 
     enabled: bool = True  # Registration enabled by default
-
-

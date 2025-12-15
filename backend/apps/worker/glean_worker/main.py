@@ -70,7 +70,9 @@ async def startup(ctx: dict[str, Any]) -> None:
             logger.info("✓ Milvus client connected successfully")
         except Exception as e:
             logger.warning(f"✗ Failed to connect to Milvus: {e}")
-            logger.info("Worker will continue without Milvus - embedding and preference tasks will be skipped")
+            logger.info(
+                "Worker will continue without Milvus - embedding and preference tasks will be skipped"
+            )
             ctx["milvus_client"] = None
     else:
         logger.info("Milvus not configured - embedding and preference features disabled")

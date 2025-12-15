@@ -29,9 +29,7 @@ class TestCheckVectorizationEnabled:
             dimension=384,
         )
 
-        with patch(
-            "glean_worker.tasks.preference_worker.TypedConfigService"
-        ) as mock_service_class:
+        with patch("glean_worker.tasks.preference_worker.TypedConfigService") as mock_service_class:
             mock_service = AsyncMock()
             mock_service.get.return_value = mock_config
             mock_service_class.return_value = mock_service
@@ -53,9 +51,7 @@ class TestCheckVectorizationEnabled:
             dimension=384,
         )
 
-        with patch(
-            "glean_worker.tasks.preference_worker.TypedConfigService"
-        ) as mock_service_class:
+        with patch("glean_worker.tasks.preference_worker.TypedConfigService") as mock_service_class:
             mock_service = AsyncMock()
             mock_service.get.return_value = mock_config
             mock_service_class.return_value = mock_service
@@ -82,9 +78,7 @@ class TestCheckVectorizationEnabled:
             last_error="Connection failed",
         )
 
-        with patch(
-            "glean_worker.tasks.preference_worker.TypedConfigService"
-        ) as mock_service_class:
+        with patch("glean_worker.tasks.preference_worker.TypedConfigService") as mock_service_class:
             mock_service = AsyncMock()
             mock_service.get.return_value = mock_config
             mock_service_class.return_value = mock_service
@@ -110,9 +104,7 @@ class TestCheckVectorizationEnabled:
             dimension=384,
         )
 
-        with patch(
-            "glean_worker.tasks.preference_worker.TypedConfigService"
-        ) as mock_service_class:
+        with patch("glean_worker.tasks.preference_worker.TypedConfigService") as mock_service_class:
             mock_service = AsyncMock()
             mock_service.get.return_value = mock_config
             mock_service_class.return_value = mock_service
@@ -136,9 +128,7 @@ class TestCheckVectorizationEnabled:
             dimension=384,
         )
 
-        with patch(
-            "glean_worker.tasks.preference_worker.TypedConfigService"
-        ) as mock_service_class:
+        with patch("glean_worker.tasks.preference_worker.TypedConfigService") as mock_service_class:
             mock_service = AsyncMock()
             mock_service.get.return_value = mock_config
             mock_service_class.return_value = mock_service
@@ -168,9 +158,7 @@ class TestUpdateUserPreference:
 
         with (
             patch("glean_worker.tasks.preference_worker.get_session") as mock_get_session,
-            patch(
-                "glean_worker.tasks.preference_worker.TypedConfigService"
-            ) as mock_service_class,
+            patch("glean_worker.tasks.preference_worker.TypedConfigService") as mock_service_class,
         ):
             mock_session = AsyncMock()
             mock_get_session.return_value.__aiter__.return_value = [mock_session]
@@ -200,9 +188,7 @@ class TestUpdateUserPreference:
 
         with (
             patch("glean_worker.tasks.preference_worker.get_session") as mock_get_session,
-            patch(
-                "glean_worker.tasks.preference_worker.TypedConfigService"
-            ) as mock_service_class,
+            patch("glean_worker.tasks.preference_worker.TypedConfigService") as mock_service_class,
         ):
             mock_session = AsyncMock()
             mock_get_session.return_value.__aiter__.return_value = [mock_session]
@@ -240,9 +226,7 @@ class TestRebuildUserPreference:
 
         with (
             patch("glean_worker.tasks.preference_worker.get_session") as mock_get_session,
-            patch(
-                "glean_worker.tasks.preference_worker.TypedConfigService"
-            ) as mock_service_class,
+            patch("glean_worker.tasks.preference_worker.TypedConfigService") as mock_service_class,
         ):
             mock_session = AsyncMock()
             mock_get_session.return_value.__aiter__.return_value = [mock_session]
@@ -270,9 +254,7 @@ class TestRebuildUserPreference:
 
         with (
             patch("glean_worker.tasks.preference_worker.get_session") as mock_get_session,
-            patch(
-                "glean_worker.tasks.preference_worker.TypedConfigService"
-            ) as mock_service_class,
+            patch("glean_worker.tasks.preference_worker.TypedConfigService") as mock_service_class,
         ):
             mock_session = AsyncMock()
             mock_get_session.return_value.__aiter__.return_value = [mock_session]
@@ -287,4 +269,3 @@ class TestRebuildUserPreference:
             # Assert - Should return error dict, not raise exception
             assert result["success"] is False
             assert "disabled" in result["error"].lower()
-

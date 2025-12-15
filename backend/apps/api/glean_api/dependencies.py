@@ -208,9 +208,7 @@ async def get_score_service(
 
         milvus_client = MilvusClient()
         milvus_client.connect()
-        await milvus_client.ensure_collections(
-            config.dimension, config.provider, config.model
-        )
+        await milvus_client.ensure_collections(config.dimension, config.provider, config.model)
 
         return ScoreService(db_session=session, milvus_client=milvus_client)
     except Exception:

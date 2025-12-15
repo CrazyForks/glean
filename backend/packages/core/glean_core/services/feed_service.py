@@ -98,9 +98,7 @@ class FeedService:
 
         return responses
 
-    async def get_user_subscriptions_sync(
-        self, user_id: str
-    ) -> SubscriptionSyncResponse:
+    async def get_user_subscriptions_sync(self, user_id: str) -> SubscriptionSyncResponse:
         """
         Get all subscriptions for a user with ETag for sync.
 
@@ -122,9 +120,7 @@ class FeedService:
 
         return SubscriptionSyncResponse(items=subscriptions, etag=etag)
 
-    def _compute_subscriptions_etag(
-        self, subscriptions: list[SubscriptionResponse]
-    ) -> str:
+    def _compute_subscriptions_etag(self, subscriptions: list[SubscriptionResponse]) -> str:
         """
         Compute an ETag for subscription list.
 
@@ -185,13 +181,10 @@ class FeedService:
         # Apply search filter if provided
         if search:
             search_term = f"%{search.lower()}%"
-            base_stmt = (
-                base_stmt.join(Subscription.feed)
-                .where(
-                    (func.lower(Subscription.custom_title).like(search_term))
-                    | (func.lower(Feed.title).like(search_term))
-                    | (func.lower(Feed.url).like(search_term))
-                )
+            base_stmt = base_stmt.join(Subscription.feed).where(
+                (func.lower(Subscription.custom_title).like(search_term))
+                | (func.lower(Feed.title).like(search_term))
+                | (func.lower(Feed.url).like(search_term))
             )
 
         # Get total count

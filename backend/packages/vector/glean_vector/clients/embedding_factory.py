@@ -82,9 +82,7 @@ class EmbeddingProviderFactory:
         provider_class = cls._PROVIDERS.get(provider_name)
         if provider_class is None:
             available = ", ".join(cls._PROVIDERS.keys())
-            raise ValueError(
-                f"Unknown provider: {provider_name}. Available providers: {available}"
-            )
+            raise ValueError(f"Unknown provider: {provider_name}. Available providers: {available}")
 
         # Merge configuration
         provider_config = cls._build_provider_config(provider_name, config, kwargs)
@@ -128,9 +126,7 @@ class EmbeddingProviderFactory:
         return base_config
 
     @classmethod
-    def register_provider(
-        cls, name: str, provider_class: type[EmbeddingProvider]
-    ) -> None:
+    def register_provider(cls, name: str, provider_class: type[EmbeddingProvider]) -> None:
         """
         Register a custom provider.
 
@@ -145,8 +141,7 @@ class EmbeddingProviderFactory:
         """
         if not issubclass(provider_class, EmbeddingProvider):
             raise TypeError(
-                f"Provider class must inherit from EmbeddingProvider, "
-                f"got {provider_class.__name__}"
+                f"Provider class must inherit from EmbeddingProvider, got {provider_class.__name__}"
             )
 
         cls._PROVIDERS[name.lower()] = provider_class

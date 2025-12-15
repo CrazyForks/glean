@@ -287,4 +287,3 @@ class TestBoundaryValues:
         # Maximum valid value (10)
         config2 = EmbeddingConfig(max_retries=10)
         assert config2.max_retries == 10
-

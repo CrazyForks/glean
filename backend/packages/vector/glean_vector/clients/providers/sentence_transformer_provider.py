@@ -171,9 +171,7 @@ class SentenceTransformerProvider(EmbeddingProvider):
                 continue
 
         # All devices failed
-        raise RuntimeError(
-            f"Failed to load model on any device. Last error: {last_error}"
-        )
+        raise RuntimeError(f"Failed to load model on any device. Last error: {last_error}")
 
     def _get_model(self) -> Any:
         """Get or create Sentence Transformer model with automatic device selection."""

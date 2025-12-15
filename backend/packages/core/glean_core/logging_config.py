@@ -151,9 +151,7 @@ def intercept_standard_logging() -> None:
                 frame = frame.f_back
                 depth += 1
 
-            logger.opt(depth=depth, exception=record.exc_info).log(
-                level, record.getMessage()
-            )
+            logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
 
     # Configure standard logging
     logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
@@ -176,6 +174,7 @@ def get_logger(name: str | None = None):
     if name is None:
         # Automatically get calling module name
         import inspect
+
         frame = inspect.currentframe().f_back
         name = frame.f_globals.get("__name__", "unknown")
 

@@ -58,7 +58,7 @@ async def test_batch_embedding():
     elapsed = (time.time() - start_time) * 1000
 
     print(f"✅ {len(embeddings)} embeddings generated in {elapsed:.2f}ms")
-    print(f"   Average per text: {elapsed/len(embeddings):.2f}ms")
+    print(f"   Average per text: {elapsed / len(embeddings):.2f}ms")
     print(f"   Metadata: {metadata}")
     print()
 
@@ -106,7 +106,7 @@ async def test_multilingual():
 
 async def main():
     """Run all tests."""
-    print("\n" + "🧪 Embedding Client Test Suite" .center(60))
+    print("\n" + "🧪 Embedding Client Test Suite".center(60))
     print()
 
     try:
@@ -139,6 +139,7 @@ async def main():
     except Exception as e:
         print(f"❌ Test failed with error: {e}")
         import traceback
+
         traceback.print_exc()
         return 1
 
@@ -147,6 +148,6 @@ async def main():
 
 if __name__ == "__main__":
     import sys
+
     exit_code = asyncio.run(main())
     sys.exit(exit_code)
-

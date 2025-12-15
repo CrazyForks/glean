@@ -18,7 +18,9 @@ from glean_vector.config import embedding_config as env_embedding_config
 logger = get_logger(__name__)
 
 
-async def rebuild_embeddings(ctx: dict[str, Any], config: dict[str, Any] | None = None) -> dict[str, Any]:
+async def rebuild_embeddings(
+    ctx: dict[str, Any], config: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """
     Rebuild embeddings after config change.
 
@@ -63,7 +65,9 @@ async def rebuild_embeddings(ctx: dict[str, Any], config: dict[str, Any] | None 
                 "rate_limit": {"default": 10, "providers": {}},
             }
 
-        settings = EmbeddingSettings(**{k: v for k, v in config.items() if k in EmbeddingSettings.model_fields})
+        settings = EmbeddingSettings(
+            **{k: v for k, v in config.items() if k in EmbeddingSettings.model_fields}
+        )
         dimension = settings.dimension
 
         # Recreate Milvus collections (drop + create) for new model
@@ -92,9 +96,7 @@ async def rebuild_embeddings(ctx: dict[str, Any], config: dict[str, Any] | None 
         # Enqueue user preference rebuild jobs for all users with preference data
         # User preference vectors were deleted when collections were recreated,
         # so we need to rebuild them from historical feedback
-        users_result = await session.execute(
-            select(UserPreferenceStats.user_id).distinct()
-        )
+        users_result = await session.execute(select(UserPreferenceStats.user_id).distinct())
         user_ids = [row[0] for row in users_result.all()]
 
         for user_id in user_ids:
@@ -114,4 +116,3 @@ async def rebuild_embeddings(ctx: dict[str, Any], config: dict[str, Any] | None 
         }
 
     return {"success": False, "error": "No database session"}
-

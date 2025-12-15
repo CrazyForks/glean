@@ -217,4 +217,3 @@ class TestEmbeddingConfigValidation:
                 "greater than or equal to",
             ]
         )
-

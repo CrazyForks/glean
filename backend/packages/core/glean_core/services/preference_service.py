@@ -45,18 +45,14 @@ class PreferenceService:
         stats = result.scalar_one_or_none()
 
         # Get counts from UserEntry
-        result = await self.db.execute(
-            select(UserEntry).where(UserEntry.user_id == user_id)
-        )
+        result = await self.db.execute(select(UserEntry).where(UserEntry.user_id == user_id))
         user_entries = result.scalars().all()
 
         total_likes = sum(1 for ue in user_entries if ue.is_liked is True)
         total_dislikes = sum(1 for ue in user_entries if ue.is_liked is False)
 
         # Get bookmarks count
-        result = await self.db.execute(
-            select(Bookmark).where(Bookmark.user_id == user_id)
-        )
+        result = await self.db.execute(select(Bookmark).where(Bookmark.user_id == user_id))
         bookmarks = result.scalars().all()
         total_bookmarks = len(bookmarks)
 
@@ -82,9 +78,7 @@ class PreferenceService:
                 total = pos + neg
                 if total > 0:
                     score = (pos - neg) / total
-                    source_scores.append(
-                        {"feed_id": feed_id, "affinity_score": round(score, 2)}
-                    )
+                    source_scores.append({"feed_id": feed_id, "affinity_score": round(score, 2)})
 
             top_sources_raw = sorted(
                 source_scores, key=lambda x: x["affinity_score"], reverse=True
@@ -93,9 +87,7 @@ class PreferenceService:
             # Fetch feed titles for top sources
             if top_sources_raw:
                 feed_ids = [s["feed_id"] for s in top_sources_raw]
-                result = await self.db.execute(
-                    select(Feed).where(Feed.id.in_(feed_ids))
-                )
+                result = await self.db.execute(select(Feed).where(Feed.id.in_(feed_ids)))
                 feeds = {f.id: f for f in result.scalars().all()}
                 top_sources = [
                     {
@@ -120,9 +112,7 @@ class PreferenceService:
                     score = (pos - neg) / total
                     author_scores.append({"name": author, "affinity_score": round(score, 2)})
 
-            top_authors = sorted(author_scores, key=lambda x: x["affinity_score"], reverse=True)[
-                :5
-            ]
+            top_authors = sorted(author_scores, key=lambda x: x["affinity_score"], reverse=True)[:5]
 
         return {
             "total_likes": total_likes,

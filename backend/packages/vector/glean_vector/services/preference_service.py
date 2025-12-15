@@ -73,9 +73,7 @@ class PreferenceService:
             return
 
         # Get entry metadata for affinity tracking
-        result = await self.db.execute(
-            select(Entry).where(Entry.id == entry_id)
-        )
+        result = await self.db.execute(select(Entry).where(Entry.id == entry_id))
         entry = result.scalar_one_or_none()
         if not entry:
             return

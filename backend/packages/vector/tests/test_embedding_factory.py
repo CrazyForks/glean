@@ -146,9 +146,7 @@ async def test_similarity_comparison():
         "nature": "The forest is full of trees and animals",
     }
 
-    client = EmbeddingClient(
-        provider="sentence-transformers", model="all-MiniLM-L6-v2"
-    )
+    client = EmbeddingClient(provider="sentence-transformers", model="all-MiniLM-L6-v2")
 
     embeddings = {}
     for key, text in texts.items():
@@ -231,6 +229,6 @@ async def main():
 
 if __name__ == "__main__":
     import sys
+
     exit_code = asyncio.run(main())
     sys.exit(exit_code)
-

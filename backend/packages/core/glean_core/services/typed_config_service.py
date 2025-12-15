@@ -325,4 +325,3 @@ class TypedConfigService:
         from glean_core.schemas.config import RegistrationConfig
 
         await self.update(RegistrationConfig, enabled=enabled)
-

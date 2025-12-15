@@ -81,9 +81,7 @@ async def test_calculate_score_caches_user_stats(
 
 
 @pytest.mark.asyncio
-async def test_get_user_stats_cache_works(
-    mock_db_session, mock_milvus_client, mock_user_stats
-):
+async def test_get_user_stats_cache_works(mock_db_session, mock_milvus_client, mock_user_stats):
     """Test that _get_user_stats properly caches results."""
     # Setup mock
     mock_result = MagicMock()
@@ -161,9 +159,7 @@ async def test_batch_calculate_scores_populates_cache(
 
 
 @pytest.mark.asyncio
-async def test_cache_isolates_different_users(
-    mock_db_session, mock_milvus_client, mock_entry
-):
+async def test_cache_isolates_different_users(mock_db_session, mock_milvus_client, mock_entry):
     """Test that cache correctly isolates stats for different users."""
     # Setup mocks for two different users
     stats_user1 = MagicMock(spec=UserPreferenceStats)
@@ -177,9 +173,7 @@ async def test_cache_isolates_different_users(
     async def mock_execute(query):
         # Return different stats based on call count (first call = user1, second = user2)
         result = MagicMock()
-        result.scalar_one_or_none.return_value = (
-            stats_user1 if call_count[0] == 0 else stats_user2
-        )
+        result.scalar_one_or_none.return_value = stats_user1 if call_count[0] == 0 else stats_user2
         call_count[0] += 1
         return result
 
@@ -208,4 +202,3 @@ async def test_cache_isolates_different_users(
 
     # No additional DB queries
     assert call_count[0] == 2
-

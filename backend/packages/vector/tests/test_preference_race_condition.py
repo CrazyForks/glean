@@ -130,7 +130,9 @@ async def test_concurrent_preference_updates_with_lock(
 
     # First call should have count around 6.0 (5.0 + 1.0)
     first_call_count = calls[0][1]["sample_count"]
-    assert abs(first_call_count - 6.0) < 0.1, f"First update count should be ~6.0, got {first_call_count}"
+    assert abs(first_call_count - 6.0) < 0.1, (
+        f"First update count should be ~6.0, got {first_call_count}"
+    )
 
     # NOTE: In a real scenario with locks, the second call would read the updated
     # preference from Milvus. In this test, our mock always returns the initial state,
@@ -141,9 +143,7 @@ async def test_concurrent_preference_updates_with_lock(
 
 
 @pytest.mark.asyncio
-async def test_preference_update_without_redis(
-    mock_db_session, mock_milvus_client
-):
+async def test_preference_update_without_redis(mock_db_session, mock_milvus_client):
     """Test that preference updates work even without Redis (degraded mode)."""
     service = PreferenceService(
         db_session=mock_db_session,
@@ -162,9 +162,7 @@ async def test_preference_update_without_redis(
 
 
 @pytest.mark.asyncio
-async def test_lock_timeout_handling(
-    mock_db_session, mock_milvus_client
-):
+async def test_lock_timeout_handling(mock_db_session, mock_milvus_client):
     """Test handling of lock acquisition timeout."""
     # Create a Redis mock that always fails to acquire lock
     redis = MagicMock(spec=Redis)
@@ -181,7 +179,9 @@ async def test_lock_timeout_handling(
         async def release(self):
             pass
 
-    redis.lock = lambda key, timeout, blocking_timeout: AlwaysBlockedLock(key, timeout, blocking_timeout)
+    redis.lock = lambda key, timeout, blocking_timeout: AlwaysBlockedLock(
+        key, timeout, blocking_timeout
+    )
 
     service = PreferenceService(
         db_session=mock_db_session,
@@ -198,9 +198,7 @@ async def test_lock_timeout_handling(
 
 
 @pytest.mark.asyncio
-async def test_lock_release_on_exception(
-    mock_db_session, mock_milvus_client, mock_redis_client
-):
+async def test_lock_release_on_exception(mock_db_session, mock_milvus_client, mock_redis_client):
     """Test that locks are released even when exceptions occur."""
     service = PreferenceService(
         db_session=mock_db_session,
@@ -209,9 +207,7 @@ async def test_lock_release_on_exception(
     )
 
     # Make get_user_preferences raise an exception
-    mock_milvus_client.get_user_preferences = AsyncMock(
-        side_effect=Exception("Milvus error")
-    )
+    mock_milvus_client.get_user_preferences = AsyncMock(side_effect=Exception("Milvus error"))
 
     user_id = "test-user-error"
     embedding = np.random.rand(384).tolist()
@@ -266,7 +262,7 @@ async def test_separate_locks_per_vector_type(
     # Update positive and negative concurrently
     # These should NOT block each other since they use different lock keys
     tasks = [
-        service._update_preference_vector(user_id, embedding, 1.0),   # positive
+        service._update_preference_vector(user_id, embedding, 1.0),  # positive
         service._update_preference_vector(user_id, embedding, -1.0),  # negative
     ]
 
@@ -280,4 +276,3 @@ async def test_separate_locks_per_vector_type(
 
     # Both should complete
     assert mock_milvus_client.upsert_user_preference.call_count == 2
-

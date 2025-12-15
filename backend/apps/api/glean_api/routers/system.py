@@ -109,5 +109,3 @@ async def health_check() -> dict[str, str]:
         Health status.
     """
     return {"status": "healthy"}
-
-

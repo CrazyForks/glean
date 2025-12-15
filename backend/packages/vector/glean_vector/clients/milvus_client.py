@@ -145,9 +145,7 @@ class MilvusClient:
             self._entries_collection = collection
             self._entries_collection.load()
         else:
-            self._entries_collection = self._create_entries_collection(
-                dimension, provider, model
-            )
+            self._entries_collection = self._create_entries_collection(dimension, provider, model)
 
         # Check preferences collection
         if utility.has_collection(self.config.prefs_collection):
@@ -334,9 +332,7 @@ class MilvusClient:
         collection = Collection(name=self.config.prefs_collection, schema=schema)
 
         # Simple FLAT index for small preference set
-        collection.create_index(
-            "embedding", {"index_type": "FLAT", "metric_type": "COSINE"}
-        )
+        collection.create_index("embedding", {"index_type": "FLAT", "metric_type": "COSINE"})
 
         # Create index for user_id with error handling
         try:
@@ -419,9 +415,7 @@ class MilvusClient:
             return results[0]["embedding"]
         return None
 
-    async def batch_get_entry_embeddings(
-        self, entry_ids: list[str]
-    ) -> dict[str, list[float]]:
+    async def batch_get_entry_embeddings(self, entry_ids: list[str]) -> dict[str, list[float]]:
         """
         Get embeddings for multiple entries in batch.
 
@@ -441,9 +435,7 @@ class MilvusClient:
         ids_str = ", ".join(f'"{self._escape_string(eid)}"' for eid in entry_ids)
         expr = f"id in [{ids_str}]"
 
-        results = self._entries_collection.query(
-            expr=expr, output_fields=["id", "embedding"]
-        )
+        results = self._entries_collection.query(expr=expr, output_fields=["id", "embedding"])
 
         return {result["id"]: result["embedding"] for result in results}
 

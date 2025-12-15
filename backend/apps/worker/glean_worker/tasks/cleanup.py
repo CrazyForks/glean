@@ -56,7 +56,9 @@ async def cleanup_read_later(ctx: dict[str, Any]) -> dict[str, int]:
             await session.commit()
 
             cleaned_count = result.rowcount or 0
-            logger.info(f"[cleanup_read_later] Cleaned up {cleaned_count} expired read-later entries")
+            logger.info(
+                f"[cleanup_read_later] Cleaned up {cleaned_count} expired read-later entries"
+            )
 
         except Exception as e:
             logger.error(f"[cleanup_read_later] Error during cleanup: {e}")

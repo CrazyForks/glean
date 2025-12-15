@@ -1,6 +1,5 @@
 """Test security aspects of Milvus client."""
 
-
 from glean_vector.clients.milvus_client import MilvusClient
 
 
@@ -42,7 +41,7 @@ class TestMilvusClientSecurity:
         # Attempt to break out of quotes
         injection_id = 'malicious" OR 1==1 OR id=="'
         escaped = MilvusClient._escape_string(injection_id)
-        assert '"' not in escaped.replace('\\"', '')  # No unescaped quotes
+        assert '"' not in escaped.replace('\\"', "")  # No unescaped quotes
 
         # Attempt with backslash escape
         injection_id2 = 'malicious\\" OR 1==1 OR id==\\"'
@@ -64,7 +63,7 @@ class TestMilvusClientSecurity:
 
     def test_batch_query_safety(self) -> None:
         """Test that batch queries are safe after escaping."""
-        entry_ids = ['normal_id', 'id"with"quotes', 'id\\with\\backslash']
+        entry_ids = ["normal_id", 'id"with"quotes', "id\\with\\backslash"]
 
         # Simulate what happens in batch_get_entry_embeddings
         ids_str = ", ".join(f'"{MilvusClient._escape_string(eid)}"' for eid in entry_ids)
@@ -72,4 +71,3 @@ class TestMilvusClientSecurity:
 
         expected = 'id in ["normal_id", "id\\"with\\"quotes", "id\\\\with\\\\backslash"]'
         assert expr == expected
-
