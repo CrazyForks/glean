@@ -3,8 +3,6 @@ import { bookmarkService, type BookmarkListParams } from '@glean/api-client'
 import { logger } from '@glean/logger'
 import type { Bookmark, CreateBookmarkRequest, UpdateBookmarkRequest } from '@glean/types'
 
-interface BookmarkFilters extends BookmarkListParams {}
-
 interface BookmarkState {
   bookmarks: Bookmark[]
   total: number
@@ -12,7 +10,7 @@ interface BookmarkState {
   pages: number
   loading: boolean
   error: string | null
-  filters: BookmarkFilters
+  filters: BookmarkListParams
 
   fetchBookmarks: (params?: BookmarkListParams) => Promise<void>
   createBookmark: (data: CreateBookmarkRequest) => Promise<Bookmark | null>
@@ -22,7 +20,7 @@ interface BookmarkState {
   removeFolder: (bookmarkId: string, folderId: string) => Promise<Bookmark | null>
   addTag: (bookmarkId: string, tagId: string) => Promise<Bookmark | null>
   removeTag: (bookmarkId: string, tagId: string) => Promise<Bookmark | null>
-  setFilters: (filters: BookmarkFilters) => void
+  setFilters: (filters: BookmarkListParams) => void
   reset: () => void
 }
 
