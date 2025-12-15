@@ -32,7 +32,7 @@ from glean_core.schemas.admin import (
     UserListItem,
     UserListResponse,
 )
-from glean_core.services import AdminService
+from glean_core.services import AdminService, SystemService
 from glean_database.session import get_session
 
 from ..config import settings
@@ -40,6 +40,7 @@ from ..dependencies import (
     get_admin_service,
     get_current_admin,
     get_redis_pool,
+    get_system_service,
 )
 
 router = APIRouter()
@@ -630,6 +631,7 @@ async def batch_entry_operation(
     return {"affected": count}
 
 
+<<<<<<< HEAD
 # =========================
 # Embedding configuration
 # =========================
@@ -976,3 +978,44 @@ async def get_embedding_status(
         ),
         "progress": progress,
     }
+
+
+# System Settings
+@router.get("/settings/registration", response_model=dict[str, bool])
+async def get_registration_status(
+    current_admin: Annotated[AdminUserResponse, Depends(get_current_admin)],
+    system_service: Annotated[SystemService, Depends(get_system_service)],
+) -> dict[str, bool]:
+    """
+    Get registration enabled status.
+
+    Args:
+        current_admin: Current authenticated admin.
+        system_service: System service instance.
+
+    Returns:
+        Registration status.
+    """
+    enabled = await system_service.is_registration_enabled()
+    return {"enabled": enabled}
+
+
+@router.post("/settings/registration", response_model=dict[str, bool])
+async def set_registration_status(
+    enabled: bool,
+    current_admin: Annotated[AdminUserResponse, Depends(get_current_admin)],
+    system_service: Annotated[SystemService, Depends(get_system_service)],
+) -> dict[str, bool]:
+    """
+    Set registration enabled status.
+
+    Args:
+        enabled: New status.
+        current_admin: Current authenticated admin.
+        system_service: System service instance.
+
+    Returns:
+        New registration status.
+    """
+    await system_service.set_registration_enabled(enabled)
+    return {"enabled": enabled}

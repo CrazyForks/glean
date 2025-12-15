@@ -16,6 +16,17 @@
     }
   },
   "settings": {
+    "system": {
+      "title": "System Settings",
+      "subtitle": "Manage global configuration for your Glean instance."
+    },
+    "registration": {
+      "title": "User Registration",
+      "description": "Control whether new users can sign up for an account. Existing users will still be able to log in.",
+      "enableLabel": "Enable Registration",
+      "enabled": "New users can sign up.",
+      "disabled": "Sign up is disabled."
+    },
     "embedding": {
       "title": "Embedding Settings",
       "subtitle": "Configure vectorization for AI-powered recommendations.",

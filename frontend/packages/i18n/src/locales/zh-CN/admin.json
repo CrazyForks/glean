@@ -16,6 +16,17 @@
     }
   },
   "settings": {
+    "system": {
+      "title": "系统设置",
+      "subtitle": "管理 Glean 实例的全局配置。"
+    },
+    "registration": {
+      "title": "用户注册",
+      "description": "控制是否允许新用户注册。现有用户仍可正常登录。",
+      "enableLabel": "启用注册",
+      "enabled": "新用户可以注册。",
+      "disabled": "注册已禁用。"
+    },
     "embedding": {
       "title": "向量化设置",
       "subtitle": "配置向量化以启用智能推荐。",

@@ -23,6 +23,7 @@ from glean_core.services import (
     FolderService,
     PreferenceService,
     SystemConfigService,
+    SystemService,
     TagService,
     UserService,
 )
@@ -215,6 +216,13 @@ async def get_score_service(
     except Exception:
         # Milvus not available, fall back to simple scoring
         return SimpleScoreService(session)
+
+
+def get_system_service(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> SystemService:
+    """Get system service instance."""
+    return SystemService(session)
 
 
 async def get_current_admin(

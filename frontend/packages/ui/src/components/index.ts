@@ -6,7 +6,6 @@ export * from './avatar'
 export * from './badge'
 export * from './breadcrumb'
 export * from './button'
-export * from './card'
 export * from './checkbox'
 export * from './checkbox-group'
 export * from './collapsible'
@@ -48,3 +47,13 @@ export * from './toggle-group'
 export * from './toolbar'
 export * from './tooltip'
 
+// Card and Switch use uppercase filenames
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from './Card'
+export { Switch } from './Switch'
