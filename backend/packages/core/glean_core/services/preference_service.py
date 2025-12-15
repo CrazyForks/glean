@@ -81,7 +81,9 @@ class PreferenceService:
                     source_scores.append({"feed_id": feed_id, "affinity_score": round(score, 2)})
 
             top_sources_raw = sorted(
-                source_scores, key=lambda x: x["affinity_score"], reverse=True  # type: ignore[arg-type,return-value]
+                source_scores,
+                key=lambda x: x["affinity_score"],
+                reverse=True,  # type: ignore[arg-type,return-value]
             )[:5]
 
             # Fetch feed titles for top sources
