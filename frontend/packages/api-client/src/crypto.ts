@@ -12,16 +12,39 @@ import sha256 from 'crypto-js/sha256'
 import encHex from 'crypto-js/enc-hex'
 
 /**
- * Check if Web Crypto API is available.
+ * Check if we're in a secure context where Web Crypto API is available.
  *
  * crypto.subtle is only available in secure contexts:
  * - HTTPS connections
  * - localhost (http://localhost, http://127.0.0.1)
  *
+ * We use multiple checks for maximum compatibility:
+ * 1. globalThis.isSecureContext - the standard way to detect secure context
+ * 2. Check if crypto.subtle exists and has the digest function
+ *
  * On plain HTTP with non-localhost domains, crypto.subtle is undefined.
  */
 function isWebCryptoAvailable(): boolean {
-  return typeof crypto !== 'undefined' && crypto.subtle !== undefined
+  try {
+    // First check: use isSecureContext if available (most reliable)
+    if (typeof globalThis !== 'undefined' && 'isSecureContext' in globalThis) {
+      if (!globalThis.isSecureContext) {
+        return false
+      }
+    }
+
+    // Second check: verify crypto.subtle is actually available and functional
+    return (
+      typeof crypto !== 'undefined' &&
+      crypto !== null &&
+      typeof crypto.subtle !== 'undefined' &&
+      crypto.subtle !== null &&
+      typeof crypto.subtle.digest === 'function'
+    )
+  } catch {
+    // If any check throws, fall back to crypto-js
+    return false
+  }
 }
 
 /**
