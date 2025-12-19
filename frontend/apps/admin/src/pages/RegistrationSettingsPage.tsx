@@ -80,7 +80,7 @@ export default function RegistrationSettingsPage() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-8">
-        <div className="max-w-4xl space-y-8">
+        <div className="space-y-8">
           {error && (
             <Alert variant="error">
               <AlertCircle className="h-4 w-4" />

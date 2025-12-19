@@ -96,7 +96,7 @@ function StatusBadge({ status }: { status?: VectorizationStatus }) {
     },
   }
 
-  // Default to 'disabled' if status is undefined or invalid
+  // Use status directly from backend (backend already handles enabled/disabled state)
   const effectiveStatus = status && status in statusConfig ? status : 'disabled'
   const { icon, color, label } = statusConfig[effectiveStatus]
 
@@ -140,6 +140,7 @@ export default function SettingsPage() {
       }
 
       setForm({
+        enabled: config.enabled,
         provider,
         model: config.model || DEFAULT_SENTENCE_MODEL.value,
         base_url: baseUrl,
@@ -243,15 +244,32 @@ export default function SettingsPage() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    await updateMutation.mutateAsync(form)
+    
+    // Check if enabled state has changed from the config
+    const enabledChanged = form.enabled !== undefined && form.enabled !== config?.enabled
+    
+    // Extract enabled from form - it should only be handled by enable/disable endpoints
+    const { enabled: _enabled, ...configUpdates } = form
+    
+    // First, save configuration (without enabled field)
+    // This ensures provider/model are updated before enabling
+    if (Object.keys(configUpdates).length > 0) {
+      await updateMutation.mutateAsync(configUpdates)
+    }
+    
+    // Then, handle enable/disable if changed
+    if (enabledChanged && form.enabled) {
+      // Enable vectorization (this will validate and trigger rebuild)
+      await enableMutation.mutateAsync()
+    } else if (enabledChanged && !form.enabled) {
+      // Disable vectorization
+      await disableMutation.mutateAsync()
+    }
   }
 
-  const handleToggleEnabled = async () => {
-    if (config?.enabled) {
-      await disableMutation.mutateAsync()
-    } else {
-      await enableMutation.mutateAsync()
-    }
+  const handleToggleEnabled = (checked: boolean) => {
+    // Update form state only, don't trigger API call until save
+    setForm((prev) => ({ ...prev, enabled: checked }))
   }
 
   const handleValidate = async () => {
@@ -278,19 +296,16 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-1 flex-col overflow-y-auto">
       <div className="border-b border-border bg-card px-8 py-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {t('admin:settings.embedding.title', 'Embedding Settings')}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t(
-                'admin:settings.embedding.subtitle',
-                'Configure vectorization for AI-powered recommendations.'
-              )}
-            </p>
-          </div>
-          {config && <StatusBadge status={config.status} />}
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">
+            {t('admin:settings.embedding.title', 'Embedding Settings')}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t(
+              'admin:settings.embedding.subtitle',
+              'Configure vectorization for AI-powered recommendations.'
+            )}
+          </p>
         </div>
       </div>
 
@@ -304,23 +319,34 @@ export default function SettingsPage() {
             {/* Main Configuration Card */}
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>{t('admin:settings.embedding.config', 'Configuration')}</CardTitle>
-                  <div className="flex items-center gap-3">
-                    <Label htmlFor="enabled" className="text-sm font-normal text-muted-foreground">
-                      {t('admin:settings.embedding.enabled', 'Enable Vectorization')}
-                    </Label>
-                    <Switch
-                      id="enabled"
-                      checked={config?.enabled || false}
-                      onCheckedChange={handleToggleEnabled}
-                      disabled={isAnyLoading}
-                    />
-                  </div>
-                </div>
+                <CardTitle>{t('admin:settings.embedding.config', 'Configuration')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <form className="space-y-5" onSubmit={handleSubmit}>
+                  {/* Enable/Disable Toggle */}
+                  <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 p-4">
+                    <div className="flex-1 space-y-0.5">
+                      <Label htmlFor="enabled" className="text-base font-medium">
+                        {t('admin:settings.embedding.enabled', 'Enable Vectorization')}
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        {t(
+                          'admin:settings.embedding.enabledDesc',
+                          'Turn on AI-powered recommendations using vector embeddings.'
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {config && <StatusBadge status={config.status} />}
+                      <Switch
+                        id="enabled"
+                        checked={form.enabled ?? false}
+                        onCheckedChange={handleToggleEnabled}
+                        disabled={isAnyLoading}
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="provider">{t('admin:settings.embedding.provider', 'Provider')}</Label>
                     <select

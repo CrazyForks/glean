@@ -304,8 +304,30 @@ async def validate_and_rebuild_embeddings(ctx: dict[str, Any]) -> dict[str, Any]
             )
             return {"success": False, "error": "Milvus client not available"}
 
-        # Validation passed, trigger rebuild
-        logger.info("Validation passed, triggering rebuild")
+        # Validation passed, check if rebuild is actually needed
+        # If collections already exist with the same model signature, skip rebuild
+        is_compatible, reason = milvus_client.check_model_compatibility(
+            config.dimension, config.provider, config.model
+        )
+
+        if is_compatible and milvus_client.collections_exist():
+            # Collections exist and are compatible - no rebuild needed
+            logger.info(
+                "Collections already compatible with config, skipping rebuild. "
+                f"model={config.provider}:{config.model}, dimension={config.dimension}"
+            )
+            await config_service.update(EmbeddingConfig, status=VectorizationStatus.IDLE)
+            return {
+                "success": True,
+                "message": "Collections already compatible, no rebuild needed",
+                "skipped_rebuild": True,
+            }
+
+        # Rebuild needed: either collections don't exist or model changed
+        logger.info(
+            f"Rebuild required: {reason or 'collections do not exist'}. "
+            "Triggering rebuild..."
+        )
 
         if redis:
             await redis.enqueue_job("rebuild_embeddings")

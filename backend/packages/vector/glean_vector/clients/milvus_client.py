@@ -84,6 +84,66 @@ class MilvusClient:
             pass
         return None
 
+    def check_model_compatibility(
+        self, dimension: int, provider: str, model: str
+    ) -> tuple[bool, str | None]:
+        """
+        Check if existing Milvus collections are compatible with the target model config.
+
+        This is used to determine if a rebuild is necessary when enabling/updating
+        vectorization config. If the collections already match the target model,
+        no rebuild is needed.
+
+        Args:
+            dimension: Target vector dimension
+            provider: Target embedding provider
+            model: Target model name
+
+        Returns:
+            Tuple of (is_compatible, reason):
+            - (True, None) if collections match or don't exist
+            - (False, reason) if collections exist but don't match
+        """
+        self.connect()
+
+        expected_signature = self._build_model_signature(provider, model, dimension)
+
+        # Check entries collection
+        if utility.has_collection(self.config.entries_collection):  # type: ignore[truthy-function]
+            collection = Collection(self.config.entries_collection)
+            existing_signature = self._extract_model_signature(collection)
+            if existing_signature and existing_signature != expected_signature:
+                return (
+                    False,
+                    f"Entries collection signature mismatch: "
+                    f"existing={existing_signature}, expected={expected_signature}",
+                )
+
+        # Check preferences collection
+        if utility.has_collection(self.config.prefs_collection):  # type: ignore[truthy-function]
+            collection = Collection(self.config.prefs_collection)
+            existing_signature = self._extract_model_signature(collection)
+            if existing_signature and existing_signature != expected_signature:
+                return (
+                    False,
+                    f"Preferences collection signature mismatch: "
+                    f"existing={existing_signature}, expected={expected_signature}",
+                )
+
+        return (True, None)
+
+    def collections_exist(self) -> bool:
+        """
+        Check if both required Milvus collections exist.
+
+        Returns:
+            True if both entries and preferences collections exist
+        """
+        self.connect()
+        entries_exist = utility.has_collection(self.config.entries_collection)  # type: ignore[truthy-function]
+        prefs_exist = utility.has_collection(self.config.prefs_collection)  # type: ignore[truthy-function]
+        return bool(entries_exist and prefs_exist)
+
     def connect(self) -> None:
         """Establish connection to Milvus."""
         # Check if actually connected (not just the flag, but real connection status)
