@@ -129,4 +129,3 @@ class TestMilvusClientErrorHandling:
                 assert is_compatible is False
                 assert reason is not None
                 assert "Preferences collection" in reason
-
