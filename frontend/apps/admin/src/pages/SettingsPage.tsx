@@ -47,8 +47,14 @@ const PROVIDERS = [
 const SENTENCE_TRANSFORMER_MODELS = [
   { value: 'all-MiniLM-L6-v2', label: 'all-MiniLM-L6-v2' },
   { value: 'all-mpnet-base-v2', label: 'all-mpnet-base-v2' },
-  { value: 'paraphrase-multilingual-MiniLM-L12-v2', label: 'paraphrase-multilingual-MiniLM-L12-v2' },
-  { value: 'paraphrase-multilingual-mpnet-base-v2', label: 'paraphrase-multilingual-mpnet-base-v2' },
+  {
+    value: 'paraphrase-multilingual-MiniLM-L12-v2',
+    label: 'paraphrase-multilingual-MiniLM-L12-v2',
+  },
+  {
+    value: 'paraphrase-multilingual-mpnet-base-v2',
+    label: 'paraphrase-multilingual-mpnet-base-v2',
+  },
   { value: 'distiluse-base-multilingual-cased-v2', label: 'distiluse-base-multilingual-cased-v2' },
   { value: 'custom', label: 'Custom Model...' },
 ]
@@ -68,7 +74,10 @@ const DEFAULT_OPENAI_MODEL = OPENAI_MODELS.find((m) => m.value !== 'custom') ?? 
 function StatusBadge({ status }: { status?: VectorizationStatus }) {
   const { t } = useTranslation('admin')
 
-  const statusConfig: Record<VectorizationStatus, { icon: React.ReactNode; color: string; label: string }> = {
+  const statusConfig: Record<
+    VectorizationStatus,
+    { icon: React.ReactNode; color: string; label: string }
+  > = {
     disabled: {
       icon: <PowerOff className="h-3.5 w-3.5" />,
       color: 'bg-muted text-muted-foreground',
@@ -101,7 +110,9 @@ function StatusBadge({ status }: { status?: VectorizationStatus }) {
   const { icon, color, label } = statusConfig[effectiveStatus]
 
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${color}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${color}`}
+    >
       {icon}
       {label}
     </span>
@@ -238,20 +249,24 @@ export default function SettingsPage() {
   const handleRateLimitChange = (value: number) => {
     setForm((prev) => ({
       ...prev,
-      rate_limit: { ...prev.rate_limit, default: value, providers: prev.rate_limit?.providers || {} },
+      rate_limit: {
+        ...prev.rate_limit,
+        default: value,
+        providers: prev.rate_limit?.providers || {},
+      },
     }))
   }
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    
+
     // Check if enabled state has changed from the config
     const enabledChanged = form.enabled !== undefined && form.enabled !== config?.enabled
-    
+
     // Extract enabled from form - it should only be handled by enable/disable endpoints
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { enabled: _enabled, ...configUpdates } = form
-    
+
     // First, save configuration (without enabled field)
     // This ensures provider/model are updated before enabling
     if (Object.keys(configUpdates).length > 0) {
@@ -262,7 +277,7 @@ export default function SettingsPage() {
         return
       }
     }
-    
+
     // Then, handle enable/disable if changed (only after config update succeeds)
     if (enabledChanged && form.enabled) {
       // Enable vectorization (this will validate and trigger rebuild)
@@ -301,12 +316,12 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto">
-      <div className="border-b border-border bg-card px-8 py-6">
+      <div className="border-border bg-card border-b px-8 py-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">
+          <h1 className="text-foreground text-2xl font-bold">
             {t('admin:settings.embedding.title', 'Embedding Settings')}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             {t(
               'admin:settings.embedding.subtitle',
               'Configure vectorization for AI-powered recommendations.'
@@ -318,7 +333,7 @@ export default function SettingsPage() {
       <div className="flex-1 p-8">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
           </div>
         ) : (
           <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
@@ -330,12 +345,12 @@ export default function SettingsPage() {
               <CardContent>
                 <form className="space-y-5" onSubmit={handleSubmit}>
                   {/* Enable/Disable Toggle */}
-                  <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 p-4">
+                  <div className="border-border bg-muted/40 flex items-center justify-between rounded-lg border p-4">
                     <div className="flex-1 space-y-0.5">
                       <Label htmlFor="enabled" className="text-base font-medium">
                         {t('admin:settings.embedding.enabled', 'Enable Vectorization')}
                       </Label>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground text-sm">
                         {t(
                           'admin:settings.embedding.enabledDesc',
                           'Turn on AI-powered recommendations using vector embeddings.'
@@ -354,10 +369,12 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="provider">{t('admin:settings.embedding.provider', 'Provider')}</Label>
+                    <Label htmlFor="provider">
+                      {t('admin:settings.embedding.provider', 'Provider')}
+                    </Label>
                     <select
                       id="provider"
-                      className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                      className="border-border bg-background text-foreground w-full rounded-md border px-3 py-2 text-sm"
                       value={form.provider || DEFAULT_PROVIDER}
                       onChange={(e) => handleProviderChange(e.target.value)}
                       disabled={isAnyLoading}
@@ -376,8 +393,10 @@ export default function SettingsPage() {
                       <div className="space-y-2">
                         <select
                           id="model"
-                          className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
-                          value={useCustomModel ? 'custom' : (isPredefinedModel ? form.model : 'custom')}
+                          className="border-border bg-background text-foreground w-full rounded-md border px-3 py-2 text-sm"
+                          value={
+                            useCustomModel ? 'custom' : isPredefinedModel ? form.model : 'custom'
+                          }
                           onChange={(e) => handleModelSelect(e.target.value)}
                           disabled={isAnyLoading}
                         >
@@ -390,7 +409,10 @@ export default function SettingsPage() {
                         {(useCustomModel || !isPredefinedModel) && (
                           <Input
                             id="custom-model"
-                            placeholder={t('admin:settings.embedding.customModelPlaceholder', 'Enter custom model name')}
+                            placeholder={t(
+                              'admin:settings.embedding.customModelPlaceholder',
+                              'Enter custom model name'
+                            )}
                             value={form.model || ''}
                             onChange={(e) => handleChange('model', e.target.value)}
                             disabled={isAnyLoading}
@@ -401,7 +423,7 @@ export default function SettingsPage() {
                       <div className="space-y-2">
                         <select
                           id="model"
-                          className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                          className="border-border bg-background text-foreground w-full rounded-md border px-3 py-2 text-sm"
                           value={useCustomModel || !isPredefinedModel ? 'custom' : form.model || ''}
                           onChange={(e) => handleModelSelect(e.target.value)}
                           disabled={isAnyLoading}
@@ -452,7 +474,10 @@ export default function SettingsPage() {
                           type="password"
                           value={form.api_key ?? ''}
                           onChange={(e) => handleChange('api_key', e.target.value || null)}
-                          placeholder={t('admin:settings.embedding.apiKeyPlaceholder', 'Enter new API key to update')}
+                          placeholder={t(
+                            'admin:settings.embedding.apiKeyPlaceholder',
+                            'Enter new API key to update'
+                          )}
                           disabled={isAnyLoading}
                         />
                       </div>
@@ -461,7 +486,7 @@ export default function SettingsPage() {
                         <Label htmlFor="base_url">
                           {t('admin:settings.embedding.baseUrl', 'Base URL')}
                           {form.provider === 'volc-engine' && (
-                            <span className="ml-1 text-xs text-muted-foreground">
+                            <span className="text-muted-foreground ml-1 text-xs">
                               ({t('admin:settings.embedding.required', 'required')})
                             </span>
                           )}
@@ -474,8 +499,8 @@ export default function SettingsPage() {
                             form.provider === 'volc-engine'
                               ? 'https://ark.cn-beijing.volces.com/api/v3/'
                               : form.provider === 'openai'
-                              ? 'https://api.openai.com/v1'
-                              : ''
+                                ? 'https://api.openai.com/v1'
+                                : ''
                           }
                           disabled={isAnyLoading}
                         />
@@ -554,7 +579,10 @@ export default function SettingsPage() {
                     <Alert>
                       <AlertCircle className="h-4 w-4" />
                       <AlertTitle>
-                        {t('admin:settings.embedding.validatingInProgress', 'Validation in Progress')}
+                        {t(
+                          'admin:settings.embedding.validatingInProgress',
+                          'Validation in Progress'
+                        )}
                       </AlertTitle>
                       <AlertDescription>
                         <p className="text-sm">
@@ -563,7 +591,7 @@ export default function SettingsPage() {
                             'If this is your first time using this model, it may take several minutes to download from HuggingFace. Please be patient.'
                           )}
                         </p>
-                        <p className="mt-2 text-xs text-muted-foreground">
+                        <p className="text-muted-foreground mt-2 text-xs">
                           {t(
                             'admin:settings.embedding.downloadTimeout',
                             'The validation will timeout after 10 minutes. If validation fails due to timeout, the model may still be downloading in the background.'
@@ -608,7 +636,9 @@ export default function SettingsPage() {
 
                   {updateMutation.isSuccess && (
                     <Alert variant="success">
-                      <AlertTitle>{t('admin:settings.embedding.saved', 'Settings Saved')}</AlertTitle>
+                      <AlertTitle>
+                        {t('admin:settings.embedding.saved', 'Settings Saved')}
+                      </AlertTitle>
                       <AlertDescription>
                         {t(
                           'admin:settings.embedding.saveSuccess',
@@ -618,7 +648,9 @@ export default function SettingsPage() {
                     </Alert>
                   )}
 
-                  {(updateMutation.isError || enableMutation.isError || disableMutation.isError) && (
+                  {(updateMutation.isError ||
+                    enableMutation.isError ||
+                    disableMutation.isError) && (
                     <Alert variant="error">
                       <AlertTitle>{t('common:states.error', 'Error')}</AlertTitle>
                       <AlertDescription>
@@ -636,11 +668,13 @@ export default function SettingsPage() {
               {config?.status === 'error' && config?.last_error && (
                 <Alert variant="error">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>{t('admin:settings.embedding.errorOccurred', 'Error Occurred')}</AlertTitle>
+                  <AlertTitle>
+                    {t('admin:settings.embedding.errorOccurred', 'Error Occurred')}
+                  </AlertTitle>
                   <AlertDescription className="mt-2">
                     <p className="text-sm">{config.last_error}</p>
                     {config.error_count > 0 && (
-                      <p className="mt-1 text-xs text-muted-foreground">
+                      <p className="text-muted-foreground mt-1 text-xs">
                         {t('admin:settings.embedding.errorCount', 'Error count: {{count}}', {
                           count: config.error_count,
                         })}
@@ -659,8 +693,11 @@ export default function SettingsPage() {
                   <CardContent className="space-y-3">
                     {config.status === 'validating' && (
                       <>
-                        <p className="text-sm text-muted-foreground">
-                          {t('admin:settings.embedding.validatingConnection', 'Validating provider connection...')}
+                        <p className="text-muted-foreground text-sm">
+                          {t(
+                            'admin:settings.embedding.validatingConnection',
+                            'Validating provider connection...'
+                          )}
                         </p>
                         {config.provider === 'sentence-transformers' && (
                           <p className="text-xs text-amber-600 dark:text-amber-400">
@@ -675,26 +712,26 @@ export default function SettingsPage() {
 
                     {config.status === 'rebuilding' && statusData && (
                       <>
-                        <div className="rounded-md border border-border bg-muted/40 p-3">
-                          <div className="flex items-center justify-between text-sm text-foreground">
+                        <div className="border-border bg-muted/40 rounded-md border p-3">
+                          <div className="text-foreground flex items-center justify-between text-sm">
                             <span>{t('admin:settings.embedding.total', 'Total')}</span>
                             <span>{statusData.progress?.total ?? '-'}</span>
                           </div>
-                          <div className="mt-2 flex items-center justify-between text-sm text-foreground">
+                          <div className="text-foreground mt-2 flex items-center justify-between text-sm">
                             <span>{t('admin:settings.embedding.done', 'Done')}</span>
                             <span>{statusData.progress?.done ?? '-'}</span>
                           </div>
-                          <div className="mt-2 flex items-center justify-between text-sm text-foreground">
+                          <div className="text-foreground mt-2 flex items-center justify-between text-sm">
                             <span>{t('admin:settings.embedding.failed', 'Failed')}</span>
                             <span>{statusData.progress?.failed ?? '-'}</span>
                           </div>
-                          <div className="mt-4 h-2 rounded-full bg-accent/40">
+                          <div className="bg-accent/40 mt-4 h-2 rounded-full">
                             <div
-                              className="h-2 rounded-full bg-primary transition-all duration-300"
+                              className="bg-primary h-2 rounded-full transition-all duration-300"
                               style={{ width: `${percentDone}%` }}
                             />
                           </div>
-                          <p className="mt-2 text-xs text-muted-foreground">
+                          <p className="text-muted-foreground mt-2 text-xs">
                             {t('admin:settings.embedding.percent', '{{percent}}% completed', {
                               percent: percentDone,
                             })}
@@ -711,7 +748,7 @@ export default function SettingsPage() {
                 <CardHeader>
                   <CardTitle>{t('admin:settings.embedding.info', 'Information')}</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3 text-sm text-muted-foreground">
+                <CardContent className="text-muted-foreground space-y-3 text-sm">
                   <p>
                     {t(
                       'admin:settings.embedding.infoDesc',

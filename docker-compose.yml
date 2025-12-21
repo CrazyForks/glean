@@ -225,4 +225,3 @@ volumes:
 networks:
   glean-network:
     driver: bridge
-

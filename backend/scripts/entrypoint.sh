@@ -23,7 +23,7 @@ asyncio.run(check())
         echo "PostgreSQL is ready!"
         break
     fi
-    
+
     attempt=$((attempt + 1))
     echo "Waiting for PostgreSQL... ($attempt/$max_attempts)"
     sleep 2
@@ -49,7 +49,7 @@ if [ "$CREATE_ADMIN" = "true" ] || [ "$CREATE_ADMIN" = "1" ]; then
     ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
     ADMIN_PASSWORD=${ADMIN_PASSWORD:-$(openssl rand -base64 12)}
     ADMIN_ROLE=${ADMIN_ROLE:-super_admin}
-    
+
     echo "Creating admin user..."
     if uv run --no-sync python scripts/create-admin.py --username "$ADMIN_USERNAME" --password "$ADMIN_PASSWORD" --role "$ADMIN_ROLE" 2>&1; then
         echo ""
@@ -70,4 +70,3 @@ fi
 # Execute the main command
 echo "Starting $@..."
 exec "$@"
-
