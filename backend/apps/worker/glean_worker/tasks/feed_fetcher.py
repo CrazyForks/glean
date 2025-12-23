@@ -15,7 +15,7 @@ from glean_core.schemas.config import EmbeddingConfig, VectorizationStatus
 from glean_core.services import TypedConfigService
 from glean_database.models import Entry, Feed, FeedStatus
 from glean_database.session import get_session_context
-from glean_rss import fetch_feed, parse_feed
+from glean_rss import fetch_and_extract_fulltext, fetch_feed, parse_feed, postprocess_html
 
 
 async def _is_vectorization_enabled(session: AsyncSession) -> bool:
@@ -109,6 +109,33 @@ async def fetch_feed_task(ctx: dict[str, Any], feed_id: str) -> dict[str, str | 
                 if existing_entry:
                     continue
 
+                # Determine content: fetch full text if feed only provides summary
+                entry_content = parsed_entry.content
+                if not parsed_entry.has_full_content and parsed_entry.url:
+                    print(
+                        f"[fetch_feed_task] Entry has no full content, fetching from: "
+                        f"{parsed_entry.url}"
+                    )
+                    try:
+                        extracted_content = await fetch_and_extract_fulltext(parsed_entry.url)
+                        if extracted_content:
+                            entry_content = extracted_content
+                            print(
+                                f"[fetch_feed_task] Successfully extracted full text "
+                                f"({len(extracted_content)} chars)"
+                            )
+                        else:
+                            print("[fetch_feed_task] Full text extraction returned empty, using summary")
+                    except Exception as extract_err:
+                        print(
+                            f"[fetch_feed_task] Full text extraction failed: {extract_err}, "
+                            f"using summary"
+                        )
+                else:
+                    # Process content from feed to fix backtick formatting etc.
+                    if entry_content:
+                        entry_content = postprocess_html(entry_content, base_url=parsed_entry.url)
+
                 # Create new entry
                 entry = Entry(
                     feed_id=feed.id,
@@ -116,7 +143,7 @@ async def fetch_feed_task(ctx: dict[str, Any], feed_id: str) -> dict[str, str | 
                     url=parsed_entry.url,
                     title=parsed_entry.title,
                     author=parsed_entry.author,
-                    content=parsed_entry.content,
+                    content=entry_content,
                     summary=parsed_entry.summary,
                     published_at=parsed_entry.published_at,
                 )

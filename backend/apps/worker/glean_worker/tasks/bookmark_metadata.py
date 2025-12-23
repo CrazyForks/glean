@@ -1,7 +1,7 @@
 """
 Bookmark metadata fetching tasks.
 
-Background tasks for fetching webpage title and description for URL bookmarks.
+Background tasks for fetching webpage title, description, and full content for URL bookmarks.
 """
 
 import re
@@ -12,6 +12,7 @@ from sqlalchemy import select
 
 from glean_database.models import Bookmark
 from glean_database.session import get_session_context
+from glean_rss import extract_fulltext
 
 # Default user agent to avoid being blocked
 USER_AGENT = (
@@ -132,7 +133,7 @@ def unescape_html(text: str) -> str:
 
 async def fetch_bookmark_metadata_task(
     _ctx: dict[str, Any], bookmark_id: str
-) -> dict[str, str | None]:
+) -> dict[str, str | int | None]:
     """
     Fetch webpage metadata (title and description) for a bookmark.
 
@@ -192,9 +193,25 @@ async def fetch_bookmark_metadata_task(
             if description:
                 description = unescape_html(description)
 
+            # Extract full content using readability
+            content = None
+            try:
+                content = extract_fulltext(html, url=bookmark.url)
+                if content:
+                    print(
+                        f"[fetch_bookmark_metadata] Extracted content: {len(content)} chars"
+                    )
+                else:
+                    print("[fetch_bookmark_metadata] Content extraction returned empty")
+            except Exception as extract_err:
+                print(
+                    f"[fetch_bookmark_metadata] Content extraction failed: {extract_err}"
+                )
+
             print(f"[fetch_bookmark_metadata] Extracted title: {title}")
             print(
-                f"[fetch_bookmark_metadata] Extracted description: {description[:100] if description else None}..."
+                f"[fetch_bookmark_metadata] Extracted description: "
+                f"{description[:100] if description else None}..."
             )
 
             # Update bookmark if we got better data
@@ -212,6 +229,12 @@ async def fetch_bookmark_metadata_task(
                 updated = True
                 print(f"[fetch_bookmark_metadata] Updated excerpt for bookmark {bookmark_id}")
 
+            # Store extracted content for in-app reading
+            if content:
+                bookmark.content = content
+                updated = True
+                print(f"[fetch_bookmark_metadata] Updated content for bookmark {bookmark_id}")
+
             if updated:
                 print(f"[fetch_bookmark_metadata] SUCCESS: Updated bookmark {bookmark_id}")
             else:
@@ -222,6 +245,7 @@ async def fetch_bookmark_metadata_task(
                 "bookmark_id": bookmark_id,
                 "title": title,
                 "description": description[:200] if description else None,
+                "content_length": len(content) if content else 0,
             }
 
         except httpx.HTTPStatusError as e:
