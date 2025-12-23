@@ -28,26 +28,32 @@ export function stripHtmlTags(html: string | null | undefined): string {
 
 /**
  * Process HTML content for safe rendering.
- * Handles HTML entity decoding and ensures proper formatting.
+ * Handles HTML entity decoding for plain text and ensures proper formatting.
+ *
+ * NOTE: We do NOT decode HTML entities for content that already contains HTML tags,
+ * because that would convert escaped code examples like `&lt;img&gt;` into actual
+ * HTML elements, breaking inline code display.
  */
 export function processHtmlContent(html: string | null | undefined): string {
   if (!html) return ''
 
-  // Create a temporary DOM element to decode HTML entities
+  // Check if content already contains HTML tags BEFORE decoding
+  // This preserves escaped entities inside <code> tags like &lt;img&gt;
+  if (html.match(/<[a-z][\s\S]*>/i)) {
+    // Content has HTML tags - return as-is without entity decoding
+    return html
+  }
+
+  // For plain text content, decode HTML entities
   const temp = document.createElement('textarea')
   temp.innerHTML = html
   const decoded = temp.value
 
-  // If the content doesn't contain any HTML tags, wrap it in paragraphs
-  if (!decoded.match(/<[^>]+>/)) {
-    // Plain text content - convert newlines to paragraphs
-    return decoded
-      .split(/\n\n+/)
-      .map((para) => para.trim())
-      .filter((para) => para.length > 0)
-      .map((para) => `<p>${para.replace(/\n/g, '<br>')}</p>`)
-      .join('')
-  }
-
+  // Wrap plain text in paragraphs
   return decoded
+    .split(/\n\n+/)
+    .map((para) => para.trim())
+    .filter((para) => para.length > 0)
+    .map((para) => `<p>${para.replace(/\n/g, '<br>')}</p>`)
+    .join('')
 }
