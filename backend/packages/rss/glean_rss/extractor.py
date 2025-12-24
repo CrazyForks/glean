@@ -127,14 +127,18 @@ def postprocess_html(html: str, base_url: str | None = None) -> str:
             for match in backtick_pattern.finditer(text_str):
                 # Escape text before the match
                 before = text_str[last_end : match.start()]
-                escaped_before = before.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                escaped_before = (
+                    before.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                )
                 parts.append(escaped_before)
                 # Add the code tag
                 parts.append(backtick_to_code(match))
                 last_end = match.end()
             # Escape remaining text
             remaining = text_str[last_end:]
-            escaped_remaining = remaining.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            escaped_remaining = (
+                remaining.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            )
             parts.append(escaped_remaining)
             new_html = "".join(parts)
 

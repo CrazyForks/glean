@@ -73,7 +73,7 @@ function convertBookmarkToEntry(bookmark: Bookmark): EntryWithState {
     summary: bookmark.excerpt,
     published_at: bookmark.created_at,
     created_at: bookmark.created_at,
-    
+
     // User state fields
     is_read: true, // Bookmarks are considered read
     is_liked: null,
@@ -82,11 +82,11 @@ function convertBookmarkToEntry(bookmark: Bookmark): EntryWithState {
     read_at: bookmark.created_at,
     is_bookmarked: true, // Already a bookmark
     bookmark_id: bookmark.id,
-    
+
     // Feed info (not applicable for bookmarks)
     feed_title: null,
     feed_icon_url: null,
-    
+
     // Preference score (not applicable for bookmarks)
     preference_score: null,
     debug_info: null,
@@ -1759,4 +1759,3 @@ function EditBookmarkDialog({ bookmark, onClose, folders, tags }: EditBookmarkDi
     </Dialog>
   )
 }
-

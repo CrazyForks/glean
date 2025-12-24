@@ -198,15 +198,11 @@ async def fetch_bookmark_metadata_task(
             try:
                 content = extract_fulltext(html, url=bookmark.url)
                 if content:
-                    print(
-                        f"[fetch_bookmark_metadata] Extracted content: {len(content)} chars"
-                    )
+                    print(f"[fetch_bookmark_metadata] Extracted content: {len(content)} chars")
                 else:
                     print("[fetch_bookmark_metadata] Content extraction returned empty")
             except Exception as extract_err:
-                print(
-                    f"[fetch_bookmark_metadata] Content extraction failed: {extract_err}"
-                )
+                print(f"[fetch_bookmark_metadata] Content extraction failed: {extract_err}")
 
             print(f"[fetch_bookmark_metadata] Extracted title: {title}")
             print(

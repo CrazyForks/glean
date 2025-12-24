@@ -125,7 +125,9 @@ async def fetch_feed_task(ctx: dict[str, Any], feed_id: str) -> dict[str, str | 
                                 f"({len(extracted_content)} chars)"
                             )
                         else:
-                            print("[fetch_feed_task] Full text extraction returned empty, using summary")
+                            print(
+                                "[fetch_feed_task] Full text extraction returned empty, using summary"
+                            )
                     except Exception as extract_err:
                         print(
                             f"[fetch_feed_task] Full text extraction failed: {extract_err}, "

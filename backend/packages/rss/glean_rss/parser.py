@@ -97,7 +97,9 @@ class ParsedEntry:
             self.has_full_content = True  # Feed provides content field
         else:
             self.content = data.get("summary")
-            self.has_full_content = False  # Only has summary/description, may need full-text extraction
+            self.has_full_content = (
+                False  # Only has summary/description, may need full-text extraction
+            )
 
         # Parse published date
         published = data.get("published_parsed") or data.get("updated_parsed")
