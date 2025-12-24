@@ -156,7 +156,9 @@ async def fetch_feed_task(ctx: dict[str, Any], feed_id: str) -> dict[str, str | 
                 else:
                     # Process content from feed to fix backtick formatting etc.
                     if entry_content:
-                        entry_content = postprocess_html(entry_content, base_url=parsed_entry.url)
+                        entry_content = await postprocess_html(
+                            entry_content, base_url=parsed_entry.url
+                        )
 
                 # Create new entry
                 entry = Entry(

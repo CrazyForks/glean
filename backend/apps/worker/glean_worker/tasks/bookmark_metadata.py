@@ -205,7 +205,7 @@ async def fetch_bookmark_metadata_task(
             # Extract full content using readability
             content = None
             try:
-                content = extract_fulltext(html, url=bookmark.url)
+                content = await extract_fulltext(html, url=bookmark.url)
                 if content:
                     logger.info(
                         "Extracted content",
