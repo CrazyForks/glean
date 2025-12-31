@@ -16,6 +16,9 @@ import {
 } from '@glean/ui'
 import { Server, Loader2, CheckCircle, XCircle, RefreshCw } from 'lucide-react'
 import { useTranslation } from '@glean/i18n'
+import { createNamedLogger } from '@glean/logger'
+
+const logger = createNamedLogger({ name: 'ApiConfigDialog' })
 
 interface ApiConfigDialogProps {
   children: React.ReactElement
@@ -43,18 +46,41 @@ export function ApiConfigDialog({ children }: ApiConfigDialogProps) {
   // Load current API URL when dialog opens
   useEffect(() => {
     if (open && window.electronAPI) {
-      window.electronAPI.getApiUrl().then((url) => {
-        setApiUrl(url)
-        setOriginalUrl(url)
-        setConnectionStatus({ status: 'idle' })
-      })
+      window.electronAPI
+        .getApiUrl()
+        .then((url) => {
+          setApiUrl(url)
+          setOriginalUrl(url)
+          setConnectionStatus({ status: 'idle' })
+        })
+        .catch((error) => {
+          logger.error('Failed to load API URL', { error })
+          setConnectionStatus({
+            status: 'error',
+            message: t('config.loadFailed'),
+          })
+        })
     }
-  }, [open])
+  }, [open, t])
+
+  const isValidUrl = (url: string): boolean => {
+    try {
+      const parsed = new URL(url)
+      return ['http:', 'https:'].includes(parsed.protocol)
+    } catch {
+      return false
+    }
+  }
 
   const testConnection = async () => {
     const url = apiUrl.trim()
     if (!url) {
       setConnectionStatus({ status: 'error', message: t('config.urlRequired') })
+      return
+    }
+
+    if (!isValidUrl(url)) {
+      setConnectionStatus({ status: 'error', message: t('config.invalidUrl') })
       return
     }
 
@@ -79,7 +105,8 @@ export function ApiConfigDialog({ children }: ApiConfigDialogProps) {
           message: t('config.serverError', { status: response.status }),
         })
       }
-    } catch {
+    } catch (error) {
+      logger.error('Connection test failed', { error, url })
       setConnectionStatus({
         status: 'error',
         message: t('config.connectionFailed'),
@@ -96,20 +123,32 @@ export function ApiConfigDialog({ children }: ApiConfigDialogProps) {
       return
     }
 
+    if (!isValidUrl(url)) {
+      setConnectionStatus({ status: 'error', message: t('config.invalidUrl') })
+      return
+    }
+
     setIsSaving(true)
 
     try {
       const success = await window.electronAPI.setApiUrl(url)
       if (success) {
-        // Reload the app to apply new API URL
-        window.location.reload()
+        setConnectionStatus({
+          status: 'success',
+          message: t('config.saveSuccess'),
+        })
+        // Give user feedback before reloading
+        setTimeout(() => {
+          window.location.reload()
+        }, 500)
       } else {
         setConnectionStatus({
           status: 'error',
           message: t('config.saveFailed'),
         })
       }
-    } catch {
+    } catch (error) {
+      logger.error('Failed to save API URL', { error, url })
       setConnectionStatus({
         status: 'error',
         message: t('config.saveFailed'),
