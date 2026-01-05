@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Dialog,
   DialogTrigger,
@@ -42,6 +42,7 @@ export function ApiConfigDialog({ children }: ApiConfigDialogProps) {
   const [originalUrl, setOriginalUrl] = useState('')
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>({ status: 'idle' })
   const [isSaving, setIsSaving] = useState(false)
+  const reloadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Load current API URL when dialog opens
   useEffect(() => {
@@ -63,6 +64,16 @@ export function ApiConfigDialog({ children }: ApiConfigDialogProps) {
     }
   }, [open, t])
 
+  // Cleanup timeout on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (reloadTimeoutRef.current) {
+        clearTimeout(reloadTimeoutRef.current)
+        reloadTimeoutRef.current = null
+      }
+    }
+  }, [])
+
   // Early return if not in Electron environment (after all hooks)
   if (!window.electronAPI?.isElectron) {
     return null
@@ -75,10 +86,8 @@ export function ApiConfigDialog({ children }: ApiConfigDialogProps) {
       if (!['http:', 'https:'].includes(parsed.protocol)) {
         return false
       }
-      // Reject URLs with path components (should be root URL only)
-      if (parsed.pathname !== '/' && parsed.pathname !== '') {
-        return false
-      }
+      // Allow URLs with or without path components
+      // Some deployments may host the API at a subpath (e.g., http://example.com/glean)
       return true
     } catch {
       return false
@@ -172,10 +181,11 @@ export function ApiConfigDialog({ children }: ApiConfigDialogProps) {
           status: 'success',
           message: t('config.saveSuccess'),
         })
-        // Wait for user to see success message, then reload
-        // The promise has already resolved, ensuring settings are persisted
-        await new Promise((resolve) => setTimeout(resolve, 800))
-        window.location.reload()
+        // Settings are persisted synchronously via electron-store before the promise resolves.
+        // Wait briefly for user to see success message, then reload to apply the new configuration.
+        reloadTimeoutRef.current = setTimeout(() => {
+          globalThis.location.reload()
+        }, 800)
       } else {
         setConnectionStatus({
           status: 'error',
@@ -194,6 +204,21 @@ export function ApiConfigDialog({ children }: ApiConfigDialogProps) {
   }
 
   const hasChanges = apiUrl.trim() !== originalUrl
+
+  const getConnectionStatusClassName = (status: ConnectionStatus['status']): string => {
+    switch (status) {
+      case 'testing':
+        return 'border-border bg-muted/50 text-muted-foreground'
+      case 'success':
+        return 'border-success/30 bg-success/10 text-success'
+      case 'warning':
+        return 'border-warning/30 bg-warning/10 text-warning'
+      case 'error':
+        return 'border-destructive/30 bg-destructive/10 text-destructive'
+      default:
+        return ''
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -231,15 +256,7 @@ export function ApiConfigDialog({ children }: ApiConfigDialogProps) {
             {/* Connection Status */}
             {connectionStatus.status !== 'idle' && (
               <div
-                className={`flex items-center gap-2 rounded-lg border p-3 text-sm ${
-                  connectionStatus.status === 'testing'
-                    ? 'border-border bg-muted/50 text-muted-foreground'
-                    : connectionStatus.status === 'success'
-                      ? 'border-success/30 bg-success/10 text-success'
-                      : connectionStatus.status === 'warning'
-                        ? 'border-warning/30 bg-warning/10 text-warning'
-                        : 'border-destructive/30 bg-destructive/10 text-destructive'
-                }`}
+                className={`flex items-center gap-2 rounded-lg border p-3 text-sm ${getConnectionStatusClassName(connectionStatus.status)}`}
               >
                 {connectionStatus.status === 'testing' && (
                   <Loader2 className="h-4 w-4 animate-spin" />
