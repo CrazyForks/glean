@@ -41,9 +41,9 @@ import {
   AlertDialogClose,
 } from '@glean/ui'
 
-type FilterType = 'all' | 'unread' | 'liked' | 'read-later'
+type FilterType = 'all' | 'unread' | 'smart' | 'read-later'
 
-const FILTER_ORDER: FilterType[] = ['all', 'unread', 'liked', 'read-later']
+const FILTER_ORDER: FilterType[] = ['all', 'unread', 'smart', 'read-later']
 
 /**
  * Hook to detect mobile viewport
@@ -89,7 +89,7 @@ export default function ReaderPage() {
 
   // Initialize filterType from URL parameter or default to 'unread'
   const [filterType, setFilterType] = useState<FilterType>(() => {
-    if (tabParam && ['all', 'unread', 'liked', 'read-later'].includes(tabParam)) {
+    if (tabParam && ['all', 'unread', 'smart', 'read-later'].includes(tabParam)) {
       return tabParam
     }
     return 'unread'
@@ -125,8 +125,8 @@ export default function ReaderPage() {
     switch (filterType) {
       case 'unread':
         return { is_read: false }
-      case 'liked':
-        return { is_liked: true }
+      case 'smart':
+        return { is_read: false }
       case 'read-later':
         return { read_later: true }
       default:
@@ -145,7 +145,7 @@ export default function ReaderPage() {
     feed_id: selectedFeedId,
     folder_id: selectedFolderId,
     ...getFilterParams(),
-    view: isSmartView ? 'smart' : 'timeline',
+    view: isSmartView || filterType === 'smart' ? 'smart' : 'timeline',
   })
 
   const rawEntries = entriesData?.pages.flatMap((page) => page.items) || []
@@ -162,9 +162,9 @@ export default function ReaderPage() {
     const isSelectedInList = rawEntries.some((e) => e.id === selectedEntryId)
     if (isSelectedInList) return rawEntries
 
-    // Only keep the selected entry visible for "all" and "unread" filters
-    // For "liked" and "read-later", show only entries that match the filter
-    if (filterType === 'liked' || filterType === 'read-later') {
+    // Only keep the selected entry visible for "all", "unread", and "smart" filters
+    // For "read-later", show only entries that match the filter
+    if (filterType === 'read-later') {
       return rawEntries
     }
 
@@ -377,7 +377,7 @@ export default function ReaderPage() {
           >
             {/* Filters */}
             <div className="border-border bg-card border-b p-3">
-              {isSmartView ? (
+              {isSmartView && !selectedFeedId && !selectedFolderId ? (
                 /* Smart view header + filters */
                 <div className="space-y-2">
                   {/* Smart Header */}
@@ -420,10 +420,10 @@ export default function ReaderPage() {
                       label={t('filters.unread')}
                     />
                     <FilterTab
-                      active={filterType === 'liked'}
-                      onClick={() => handleFilterChange('liked')}
-                      icon={<Heart className="h-3.5 w-3.5" />}
-                      label={t('filters.liked')}
+                      active={filterType === 'smart'}
+                      onClick={() => handleFilterChange('smart')}
+                      icon={<Sparkles className="h-3.5 w-3.5" />}
+                      label={t('filters.smart')}
                     />
                     <FilterTab
                       active={filterType === 'read-later'}
@@ -440,7 +440,7 @@ export default function ReaderPage() {
             </div>
 
             {/* Smart view banner when vectorization is disabled */}
-            {isSmartView && !isVectorizationEnabled && (
+            {(isSmartView || filterType === 'smart') && !isVectorizationEnabled && (
               <div className="border-border bg-muted/30 border-b px-3 py-2">
                 <div className="flex items-start gap-2 text-sm">
                   <Info className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
@@ -507,7 +507,7 @@ export default function ReaderPage() {
                         filterType === 'read-later' &&
                         (user?.settings?.show_read_later_remaining ?? true)
                       }
-                      showPreferenceScore={isSmartView && showPreferenceScore}
+                      showPreferenceScore={(isSmartView || filterType === 'smart') && showPreferenceScore}
                     />
                   ))}
                 </div>
