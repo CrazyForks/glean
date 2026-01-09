@@ -121,6 +121,10 @@ export default function ReaderPage() {
   const loadMoreRef = useRef<HTMLDivElement>(null)
 
   const updateMutation = useUpdateEntryState()
+
+  // Computed value: whether we're using smart sorting (by preference score vs timeline)
+  const usesSmartSorting = isSmartView || filterType === 'smart'
+
   const getFilterParams = () => {
     switch (filterType) {
       case 'unread':
@@ -151,7 +155,7 @@ export default function ReaderPage() {
     // - 'smart': sorted by preference_score (descending)
     // - 'timeline': sorted by published_at (descending)
     // Both 'smart' and 'unread' filters use is_read: false, but differ in sort order
-    view: isSmartView || filterType === 'smart' ? 'smart' : 'timeline',
+    view: usesSmartSorting ? 'smart' : 'timeline',
   })
 
   const rawEntries = entriesData?.pages.flatMap((page) => page.items) || []
@@ -162,15 +166,16 @@ export default function ReaderPage() {
   // Merge selected entry into the list if it's not already there
   // This ensures the currently viewed article doesn't disappear from the list
   // when marked as read while viewing in the "unread" tab or Smart view
-  // However, for explicit filters like "liked" and "read-later", we should show the real filtered results
+  // However, for explicit filters like "read-later", we should show the real filtered results
   const entries = (() => {
     if (!selectedEntry || !selectedEntryId) return rawEntries
     const isSelectedInList = rawEntries.some((e) => e.id === selectedEntryId)
     if (isSelectedInList) return rawEntries
 
-    // Only keep the selected entry visible for "all", "unread", and "smart" filters
-    // For "read-later", show only entries that match the filter
-    if (filterType === 'read-later') {
+    // Keep selected entry visible for flexible filters (all, unread, smart),
+    // not for strict filters (read-later) that must show exact matches
+    const isStrictFilter = filterType === 'read-later'
+    if (isStrictFilter) {
       return rawEntries
     }
 
@@ -205,7 +210,7 @@ export default function ReaderPage() {
           }
         : selectedEntry
 
-    if (isSmartView || filterType === 'smart') {
+    if (usesSmartSorting) {
       // For Smart view or Smart filter, insert based on ORIGINAL preference_score to maintain correct order
       // Use the saved original score, not the current score (which may have changed after like/dislike)
       const selectedScore =
@@ -383,6 +388,15 @@ export default function ReaderPage() {
           >
             {/* Filters */}
             <div className="border-border bg-card border-b p-3">
+              {/*
+                UI Behavior:
+                - Global Smart View (no feed/folder selected): Shows dedicated smart view header + limited filters (unread, all)
+                - Feed/Folder View: Shows all 4 filter tabs including "smart" filter
+
+                The "smart" filter tab in Feed/Folder views allows users to see their specific feed/folder
+                sorted by preference score, while the global Smart View is a dedicated aggregated view.
+                Both use the same sorting logic (usesSmartSorting) but different UI presentations.
+              */}
               {isSmartView && !selectedFeedId && !selectedFolderId ? (
                 /* Smart view header + filters */
                 <div className="space-y-2">
@@ -513,7 +527,7 @@ export default function ReaderPage() {
                         filterType === 'read-later' &&
                         (user?.settings?.show_read_later_remaining ?? true)
                       }
-                      showPreferenceScore={(isSmartView || filterType === 'smart') && showPreferenceScore}
+                      showPreferenceScore={usesSmartSorting && showPreferenceScore}
                     />
                   ))}
                 </div>
