@@ -50,7 +50,15 @@ interface ArticleReaderProps {
   onClose?: () => void
   isFullscreen?: boolean
   onToggleFullscreen?: () => void
+  /**
+   * Show close button. Defaults to `true` on mobile, `false` on desktop.
+   * Override with explicit boolean if needed.
+   */
   showCloseButton?: boolean
+  /**
+   * Show fullscreen toggle button. Defaults to `true` on desktop, `false` on mobile.
+   * Override with explicit boolean if needed.
+   */
   showFullscreenButton?: boolean
   /** Hide read/unread status actions (for bookmarks page) */
   hideReadStatus?: boolean
@@ -139,8 +147,8 @@ export function ArticleReader({
   onClose,
   isFullscreen = false,
   onToggleFullscreen,
-  showCloseButton = false,
-  showFullscreenButton = true,
+  showCloseButton,
+  showFullscreenButton,
   hideReadStatus = false,
 }: ArticleReaderProps) {
   const { t } = useTranslation('reader')
@@ -157,6 +165,12 @@ export function ArticleReader({
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile()
   const barsVisible = useScrollHide(scrollContainerRef)
+
+  // Apply smart defaults based on mobile detection
+  // On mobile: show close button, hide fullscreen button
+  // On desktop: hide close button, show fullscreen button
+  const shouldShowCloseButton = showCloseButton ?? isMobile
+  const shouldShowFullscreenButton = showFullscreenButton ?? !isMobile
 
   // Reset outline state when entry changes
   useEffect(() => {
@@ -214,7 +228,7 @@ export function ArticleReader({
           }`}
         >
           <div className="flex h-14 items-center gap-2 px-4">
-            {showCloseButton && onClose ? (
+            {shouldShowCloseButton && onClose ? (
               <button
                 onClick={onClose}
                 className="text-muted-foreground hover:bg-accent hover:text-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors"
@@ -244,7 +258,7 @@ export function ArticleReader({
               {entry.title}
             </h1>
             <div className="flex shrink-0 items-center gap-1">
-              {showFullscreenButton && onToggleFullscreen && (
+              {shouldShowFullscreenButton && onToggleFullscreen && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -259,7 +273,7 @@ export function ArticleReader({
                   )}
                 </Button>
               )}
-              {showCloseButton && onClose && (
+              {shouldShowCloseButton && onClose && (
                 <Button
                   variant="ghost"
                   size="icon"

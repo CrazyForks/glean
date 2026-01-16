@@ -669,8 +669,6 @@ export default function ReaderPage() {
               }}
               isFullscreen={isFullscreen}
               onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
-              showFullscreenButton={!isMobile}
-              showCloseButton={isMobile}
             />
           ) : !isMobile ? (
             <div className="bg-background flex min-w-0 flex-1 flex-col items-center justify-center">

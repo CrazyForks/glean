@@ -416,6 +416,7 @@ export function Layout() {
         <button
           onClick={() => setIsMobileSidebarOpen(true)}
           className="text-muted-foreground hover:bg-accent hover:text-foreground flex h-10 w-10 items-center justify-center rounded-lg transition-colors"
+          aria-label="Open sidebar"
         >
           <MenuIcon className="h-5 w-5" />
         </button>
@@ -472,6 +473,7 @@ export function Layout() {
           <button
             onClick={() => setIsMobileSidebarOpen(false)}
             className="text-muted-foreground hover:bg-accent hover:text-foreground flex h-7 w-7 items-center justify-center rounded-lg transition-colors md:hidden"
+            aria-label="Close sidebar"
           >
             <X className="h-4 w-4" />
           </button>
@@ -481,6 +483,7 @@ export function Layout() {
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           className="border-border bg-card text-muted-foreground hover:bg-accent hover:text-foreground absolute top-16 -right-3 z-10 hidden h-6 w-6 items-center justify-center rounded-full border shadow-sm transition-colors md:flex"
+          aria-label={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
         >
           <ChevronLeft
             className={`h-4 w-4 transition-transform ${isSidebarOpen ? '' : 'rotate-180'}`}

@@ -51,9 +51,7 @@ export function SidebarItem({
       )}
       title={isSidebarCollapsed ? title || label : undefined}
     >
-      <span
-        className={cn(ICON_STYLES.base, isActive ? ICON_STYLES.active : ICON_STYLES.inactive)}
-      >
+      <span className={cn(ICON_STYLES.base, isActive ? ICON_STYLES.active : ICON_STYLES.inactive)}>
         {icon}
       </span>
       {!isSidebarCollapsed && <span className="min-w-0 flex-1 truncate text-left">{label}</span>}
@@ -137,26 +135,23 @@ export function SidebarFolderItemBase({
           )}
           <span className="relative flex h-4 w-4 shrink-0 items-center justify-center">
             <Folder
-              className="absolute h-4 w-4"
-              style={{
-                opacity: isExpanded ? 0 : 1,
-                transform: isExpanded ? 'scale(0.5) rotate(-15deg)' : 'scale(1) rotate(0deg)',
-                transition:
-                  'transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
+              className={cn(
+                'absolute h-4 w-4 transition-all duration-300 ease-out',
+                isExpanded ? 'scale-50 -rotate-[15deg] opacity-0' : 'scale-100 rotate-0 opacity-100'
+              )}
             />
             <FolderOpen
-              className="absolute h-4 w-4"
-              style={{
-                opacity: isExpanded ? 1 : 0,
-                transform: isExpanded ? 'scale(1) rotate(0deg)' : 'scale(0.5) rotate(15deg)',
-                transition:
-                  'transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
+              className={cn(
+                'absolute h-4 w-4 transition-all duration-300 ease-out',
+                isExpanded ? 'scale-100 rotate-0 opacity-100' : 'scale-50 rotate-[15deg] opacity-0'
+              )}
             />
           </span>
         </button>
-        <button onClick={onClick} className="touch-target-none h-5 min-w-0 flex-1 truncate text-left">
+        <button
+          onClick={onClick}
+          className="touch-target-none h-5 min-w-0 flex-1 truncate text-left"
+        >
           {label}
         </button>
         {!isExpanded && badge !== undefined && badge > 0 && (
@@ -229,7 +224,10 @@ export function SidebarFeedItemBase({
       onDragEnd={onDragEnd}
       onContextMenu={onContextMenu}
     >
-      <button onClick={onClick} className="touch-target-none flex h-5 min-w-0 flex-1 items-center gap-2.5">
+      <button
+        onClick={onClick}
+        className="touch-target-none flex h-5 min-w-0 flex-1 items-center gap-2.5"
+      >
         <span className="h-4 w-4 shrink-0">{icon}</span>
         <span className="min-w-0 flex-1 truncate text-left">{label}</span>
       </button>
@@ -280,12 +278,12 @@ export function SidebarTagItem({
         isActive ? SIDEBAR_ITEM_STYLES.active : SIDEBAR_ITEM_STYLES.inactive
       )}
     >
-      <button onClick={onClick} className="touch-target-none flex h-5 min-w-0 flex-1 items-center gap-2.5">
+      <button
+        onClick={onClick}
+        className="touch-target-none flex h-5 min-w-0 flex-1 items-center gap-2.5"
+      >
         {color ? (
-          <span
-            className="h-3 w-3 shrink-0 rounded-full"
-            style={{ backgroundColor: color }}
-          />
+          <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: color }} />
         ) : (
           <span className={cn(ICON_STYLES.base)}>{icon}</span>
         )}

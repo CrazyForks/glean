@@ -128,6 +128,7 @@ export function SidebarFeedsSection({
           <button
             onClick={onToggleFeedsSection}
             className="text-muted-foreground/60 hover:text-muted-foreground flex items-center gap-1 px-2 text-[10px] font-semibold tracking-wider uppercase transition-colors md:px-3 md:text-xs"
+            aria-label={isFeedsSectionExpanded ? 'Collapse feeds section' : 'Expand feeds section'}
           >
             <ChevronRight
               className={`h-3 w-3 transition-transform ${
@@ -141,6 +142,7 @@ export function SidebarFeedsSection({
               onClick={onAddFeed}
               className="text-muted-foreground/60 hover:bg-accent hover:text-foreground rounded p-1 transition-colors"
               title={t('actions.addFeed')}
+              aria-label={t('actions.addFeed')}
             >
               <Plus className="h-4 w-4" />
             </button>
@@ -148,11 +150,15 @@ export function SidebarFeedsSection({
               onClick={() => onCreateFolder(null)}
               className="text-muted-foreground/60 hover:bg-accent hover:text-foreground rounded p-1 transition-colors"
               title={t('actions.createFolder')}
+              aria-label={t('actions.createFolder')}
             >
               <FolderPlus className="h-4 w-4" />
             </button>
             <Menu>
-              <MenuTrigger className="text-muted-foreground/60 hover:bg-accent hover:text-foreground rounded p-1 transition-colors">
+              <MenuTrigger
+                className="text-muted-foreground/60 hover:bg-accent hover:text-foreground rounded p-1 transition-colors"
+                aria-label="Feed management menu"
+              >
                 <MoreHorizontal className="h-4 w-4" />
               </MenuTrigger>
               <MenuPopup align="end">
@@ -182,6 +188,7 @@ export function SidebarFeedsSection({
           onClick={onAddFeed}
           className="group text-muted-foreground hover:bg-accent hover:text-foreground flex w-full items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200"
           title={t('actions.addFeed')}
+          aria-label={t('actions.addFeed')}
         >
           <Plus className="h-5 w-5" />
         </button>
@@ -428,22 +435,16 @@ function SidebarFolderItem({
           />
           <span className="relative flex h-4 w-4 shrink-0 items-center justify-center">
             <Folder
-              className="absolute h-4 w-4"
-              style={{
-                opacity: isExpanded ? 0 : 1,
-                transform: isExpanded ? 'scale(0.5) rotate(-15deg)' : 'scale(1) rotate(0deg)',
-                transition:
-                  'transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
+              className={cn(
+                'absolute h-4 w-4 transition-all duration-300 ease-out',
+                isExpanded ? 'scale-50 -rotate-[15deg] opacity-0' : 'scale-100 rotate-0 opacity-100'
+              )}
             />
             <FolderOpen
-              className="absolute h-4 w-4"
-              style={{
-                opacity: isExpanded ? 1 : 0,
-                transform: isExpanded ? 'scale(1) rotate(0deg)' : 'scale(0.5) rotate(15deg)',
-                transition:
-                  'transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
+              className={cn(
+                'absolute h-4 w-4 transition-all duration-300 ease-out',
+                isExpanded ? 'scale-100 rotate-0 opacity-100' : 'scale-50 rotate-[15deg] opacity-0'
+              )}
             />
           </span>
         </button>
