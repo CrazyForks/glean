@@ -22,10 +22,12 @@ import {
   DialogFooter,
   Input,
   Label,
+  cn,
 } from '@glean/ui'
 import {
   ChevronRight,
   Bookmark,
+  Folder,
   FolderOpen,
   FolderPlus,
   MoreHorizontal,
@@ -33,6 +35,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import type { FolderTreeNode } from '@glean/types'
+import { SidebarItem } from './SidebarItem'
 
 interface SidebarBookmarksSectionProps {
   isSidebarOpen: boolean
@@ -98,35 +101,17 @@ export function SidebarBookmarksSection({
 
       {isBookmarkSectionExpanded && (
         <>
-          <button
+          <SidebarItem
+            icon={<Bookmark />}
+            label={t('bookmarks.allBookmarks')}
+            isActive={isBookmarksPage && !currentBookmarkFolderId && !currentBookmarkTagId}
             onClick={() => onSelectFolder(undefined)}
-            className={`group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-all duration-200 md:gap-3 md:px-3 md:py-2.5 ${
-              isBookmarksPage && !currentBookmarkFolderId && !currentBookmarkTagId
-                ? 'bg-primary/10 text-primary shadow-sm'
-                : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-            } ${!isSidebarOpen && !isMobileSidebarOpen ? 'justify-center' : ''}`}
-            title={!isSidebarOpen && !isMobileSidebarOpen ? t('bookmarks.allBookmarks') : undefined}
-          >
-            <span
-              className={`shrink-0 ${
-                isBookmarksPage && !currentBookmarkFolderId && !currentBookmarkTagId
-                  ? 'text-primary'
-                  : 'text-muted-foreground group-hover:text-foreground'
-              }`}
-            >
-              <Bookmark className="h-4 w-4 md:h-5 md:w-5" />
-            </span>
-            {(isSidebarOpen || isMobileSidebarOpen) && <span>{t('bookmarks.allBookmarks')}</span>}
-            {isBookmarksPage &&
-              !currentBookmarkFolderId &&
-              !currentBookmarkTagId &&
-              (isSidebarOpen || isMobileSidebarOpen) && (
-                <span className="bg-primary ml-auto h-1.5 w-1.5 rounded-full" />
-              )}
-          </button>
+            isSidebarCollapsed={!isSidebarOpen && !isMobileSidebarOpen}
+            title={t('bookmarks.allBookmarks')}
+          />
 
           {(isSidebarOpen || isMobileSidebarOpen) && bookmarkFolders.length > 0 && (
-            <div className="mt-1 space-y-0.5">
+            <div className="space-y-0.5">
               {bookmarkFolders.map((folder) => (
                 <SidebarBookmarkFolderItem
                   key={folder.id}
@@ -208,30 +193,54 @@ function SidebarBookmarkFolderItem({
   return (
     <div>
       <div
-        className={`group flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm transition-all duration-200 md:px-3 md:py-2 ${
+        className={cn(
+          'group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200',
           isActive
-            ? 'bg-primary/10 text-primary font-medium'
-            : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-        }`}
+            ? 'bg-primary/10 text-primary scale-[1.01] font-medium shadow-sm'
+            : 'text-muted-foreground hover:bg-accent hover:text-foreground hover:scale-[1.01]'
+        )}
       >
-        <button onClick={onToggle} className="flex items-center gap-2">
+        <button onClick={onToggle} className="touch-target-none flex h-5 items-center gap-2.5">
           {hasChildren ? (
             <ChevronRight
-              className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${
-                isExpanded ? 'rotate-90' : ''
-              }`}
+              className={cn(
+                'h-3 w-3 shrink-0 transition-transform duration-200',
+                isExpanded && 'rotate-90'
+              )}
             />
           ) : (
-            <span className="w-3.5" />
+            <span className="w-3" />
           )}
-          <FolderOpen className="h-4 w-4 shrink-0" />
+          <span className="relative flex h-4 w-4 shrink-0 items-center justify-center">
+            <Folder
+              className="absolute h-4 w-4"
+              style={{
+                opacity: isExpanded ? 0 : 1,
+                transform: isExpanded ? 'scale(0.5) rotate(-15deg)' : 'scale(1) rotate(0deg)',
+                transition:
+                  'transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
+            />
+            <FolderOpen
+              className="absolute h-4 w-4"
+              style={{
+                opacity: isExpanded ? 1 : 0,
+                transform: isExpanded ? 'scale(1) rotate(0deg)' : 'scale(0.5) rotate(15deg)',
+                transition:
+                  'transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
+            />
+          </span>
         </button>
-        <button onClick={() => onSelect(folder.id)} className="min-w-0 flex-1 truncate text-left">
+        <button
+          onClick={() => onSelect(folder.id)}
+          className="touch-target-none h-5 min-w-0 flex-1 truncate text-left"
+        >
           {folder.name}
         </button>
 
         <Menu>
-          <MenuTrigger className="text-muted-foreground hover:bg-accent hover:text-foreground rounded p-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+          <MenuTrigger className="touch-target-none text-muted-foreground hover:bg-accent hover:text-foreground h-5 rounded p-0.5 opacity-0 transition-opacity group-hover:opacity-100">
             <MoreHorizontal className="h-3.5 w-3.5" />
           </MenuTrigger>
           <MenuPopup align="end">

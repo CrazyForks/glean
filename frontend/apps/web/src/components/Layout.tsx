@@ -1,6 +1,6 @@
 import { Link, Outlet, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Rss, ChevronLeft, Menu as MenuIcon, X } from 'lucide-react'
 import { useTranslation } from '@glean/i18n'
 import {
@@ -13,7 +13,7 @@ import {
   AlertDialogFooter,
   AlertDialogClose,
 } from '@glean/ui'
-import type { Subscription, TagWithCounts } from '@glean/types'
+import type { Subscription, TagWithCounts, FolderTreeNode } from '@glean/types'
 import { useAuthStore } from '../stores/authStore'
 import { useBookmarkStore } from '../stores/bookmarkStore'
 import { useFolderStore } from '../stores/folderStore'
@@ -70,10 +70,17 @@ export function Layout() {
 
   useEffect(() => {
     const checkPlatform = async () => {
-      if (window.electronAPI?.isElectron) {
+      const electron = (
+        globalThis as typeof globalThis & {
+          electronAPI?: { isElectron?: boolean; getPlatform?: () => Promise<{ platform: string }> }
+        }
+      ).electronAPI
+      if (electron?.isElectron) {
         try {
-          const platformInfo = await window.electronAPI.getPlatform()
-          setIsMacElectron(platformInfo.platform === 'darwin')
+          const platformInfo = await electron.getPlatform?.()
+          if (platformInfo) {
+            setIsMacElectron(platformInfo.platform === 'darwin')
+          }
         } catch (error) {
           console.error('Failed to get platform info:', error)
         }
@@ -85,7 +92,7 @@ export function Layout() {
   // Sidebar resize state
   const [sidebarWidth, setSidebarWidth] = useState(() => {
     const saved = localStorage.getItem(SIDEBAR_STORAGE_KEY)
-    return saved ? parseInt(saved, 10) : SIDEBAR_DEFAULT_WIDTH
+    return saved ? Number.parseInt(saved, 10) : SIDEBAR_DEFAULT_WIDTH
   })
   const [isResizing, setIsResizing] = useState(false)
   const sidebarRef = useRef<HTMLElement>(null)
@@ -331,16 +338,85 @@ export function Layout() {
 
   const ungroupedSubscriptions = subscriptionsByFolder['__ungrouped__'] || []
 
+  // Calculate mobile header title based on current route and params
+  const mobileHeaderTitle = useMemo(() => {
+    // Only apply to /reader route
+    if (!location.pathname.includes('/reader')) {
+      return 'Glean'
+    }
+
+    const feedId = searchParams.get('feed')
+    const folderId = searchParams.get('folder')
+
+    // Priority: folder > feed > default
+    if (folderId) {
+      const findFolder = (folders: FolderTreeNode[], id: string): FolderTreeNode | null => {
+        for (const folder of folders) {
+          if (folder.id === id) return folder
+          if (folder.children.length > 0) {
+            const found = findFolder(folder.children, id)
+            if (found) return found
+          }
+        }
+        return null
+      }
+      const folder = findFolder(feedFolders, folderId)
+      if (folder) return folder.name
+    }
+
+    if (feedId) {
+      const subscription = subscriptions.find((sub) => sub.feed_id === feedId)
+      if (subscription) {
+        return subscription.custom_title || subscription.feed.title || 'Glean'
+      }
+    }
+
+    return 'Glean'
+  }, [location.pathname, searchParams, feedFolders, subscriptions])
+
   // Close mobile sidebar on navigation
   const searchParamsString = searchParams.toString()
   useEffect(() => {
     setIsMobileSidebarOpen(false)
   }, [location.pathname, searchParamsString])
 
+  // Listen for custom event to open mobile sidebar from ArticleReader
+  useEffect(() => {
+    const handleOpenSidebar = () => {
+      setIsMobileSidebarOpen(true)
+    }
+    globalThis.addEventListener('openMobileSidebar', handleOpenSidebar)
+    return () => {
+      globalThis.removeEventListener('openMobileSidebar', handleOpenSidebar)
+    }
+  }, [])
+
+  // Track if we're reading an article (hide Layout header when ArticleReader is shown)
+  const [isReadingArticle, setIsReadingArticle] = useState(false)
+
+  useEffect(() => {
+    const handleShowArticle = () => setIsReadingArticle(true)
+    const handleHideArticle = () => setIsReadingArticle(false)
+
+    globalThis.addEventListener('showArticleReader', handleShowArticle)
+    globalThis.addEventListener('hideArticleReader', handleHideArticle)
+
+    return () => {
+      globalThis.removeEventListener('showArticleReader', handleShowArticle)
+      globalThis.removeEventListener('hideArticleReader', handleHideArticle)
+    }
+  }, [])
+
   return (
     <div className="bg-background flex h-screen flex-col md:flex-row">
-      {/* Mobile Header */}
-      <header className="border-border bg-card flex h-14 shrink-0 items-center justify-between border-b px-4 md:hidden">
+      {/* Mobile Header - animate visibility when entering/leaving article reader */}
+      <header
+        className={`border-border bg-card flex shrink-0 items-center justify-between border-b px-4 transition-all duration-300 ease-out md:hidden ${
+          isReadingArticle
+            ? 'pointer-events-none h-0 min-h-0 translate-y-[-100%] opacity-0'
+            : 'h-14 min-h-14 translate-y-0 opacity-100'
+        }`}
+      >
         <button
           onClick={() => setIsMobileSidebarOpen(true)}
           className="text-muted-foreground hover:bg-accent hover:text-foreground flex h-10 w-10 items-center justify-center rounded-lg transition-colors"
@@ -351,43 +427,47 @@ export function Layout() {
           <div className="from-primary-500 to-primary-600 shadow-primary/20 flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br shadow-md">
             <Rss className="text-primary-foreground h-4 w-4" />
           </div>
-          <span className="font-display text-foreground text-lg font-bold">Glean</span>
+          <span className="font-display text-foreground min-w-0 flex-1 truncate text-lg font-bold">
+            {mobileHeaderTitle}
+          </span>
         </Link>
         <div className="w-10" />
       </header>
 
       {/* Mobile Sidebar Overlay */}
-      {isMobileSidebarOpen && (
-        <div
-          className="bg-background/80 fixed inset-0 z-40 backdrop-blur-sm md:hidden"
-          onClick={() => setIsMobileSidebarOpen(false)}
-        />
-      )}
+      <button
+        type="button"
+        aria-label="Close sidebar"
+        className={`bg-background/80 fixed inset-0 z-40 backdrop-blur-sm transition-opacity duration-300 md:hidden ${
+          isMobileSidebarOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+        onClick={() => setIsMobileSidebarOpen(false)}
+      />
 
       {/* Sidebar */}
       <aside
         ref={sidebarRef}
-        className={`border-border bg-card fixed inset-y-0 left-0 z-50 flex flex-col border-r md:relative md:z-10 ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 ${isResizing ? 'sidebar-no-transition' : 'sidebar-transition'} `}
+        className={`border-border bg-card fixed inset-y-0 left-0 z-50 flex flex-col border-r transition-[translate] duration-300 ease-out md:relative md:z-10 ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 ${isResizing ? 'sidebar-no-transition' : 'sidebar-transition'} `}
         style={{
-          width: isMobileSidebarOpen
-            ? '288px'
-            : isSidebarOpen
-              ? `${sidebarWidth}px`
-              : `${SIDEBAR_COLLAPSED_WIDTH}px`,
+          width: (() => {
+            if (isMobileSidebarOpen) return '288px'
+            if (isSidebarOpen) return `${sidebarWidth}px`
+            return `${SIDEBAR_COLLAPSED_WIDTH}px`
+          })(),
         }}
       >
         {/* Logo */}
         <div
-          className={`border-border flex items-center justify-between border-b p-3 md:p-4 ${
+          className={`border-border flex items-center justify-between border-b p-2 md:p-4 ${
             isMacElectron ? 'md:pt-12' : ''
           }`}
         >
-          <Link to="/" className="flex items-center gap-2.5 overflow-hidden md:gap-3">
-            <div className="from-primary-500 to-primary-600 shadow-primary/20 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg md:h-9 md:w-9">
-              <Rss className="text-primary-foreground h-4 w-4 md:h-5 md:w-5" />
+          <Link to="/" className="flex items-center gap-2 overflow-hidden md:gap-3">
+            <div className="from-primary-500 to-primary-600 shadow-primary/20 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg md:h-9 md:w-9">
+              <Rss className="text-primary-foreground h-3.5 w-3.5 md:h-5 md:w-5" />
             </div>
             {(isSidebarOpen || isMobileSidebarOpen) && (
-              <span className="font-display text-foreground text-lg font-bold md:text-xl">
+              <span className="font-display text-foreground text-base font-bold md:text-xl">
                 Glean
               </span>
             )}
@@ -395,9 +475,9 @@ export function Layout() {
           {/* Mobile close button */}
           <button
             onClick={() => setIsMobileSidebarOpen(false)}
-            className="text-muted-foreground hover:bg-accent hover:text-foreground flex h-8 w-8 items-center justify-center rounded-lg transition-colors md:hidden"
+            className="text-muted-foreground hover:bg-accent hover:text-foreground flex h-7 w-7 items-center justify-center rounded-lg transition-colors md:hidden"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
@@ -407,26 +487,35 @@ export function Layout() {
           className="border-border bg-card text-muted-foreground hover:bg-accent hover:text-foreground absolute top-16 -right-3 z-10 hidden h-6 w-6 items-center justify-center rounded-full border shadow-sm transition-colors md:flex"
         >
           <ChevronLeft
-            className={`h-4 w-4 transition-transform ${!isSidebarOpen ? 'rotate-180' : ''}`}
+            className={`h-4 w-4 transition-transform ${isSidebarOpen ? '' : 'rotate-180'}`}
           />
         </button>
 
         {/* Resize handle - desktop only, when sidebar is expanded */}
         {isSidebarOpen && (
-          <div
-            className="absolute top-0 -right-1 bottom-0 hidden w-2 cursor-col-resize md:block"
+          <button
+            type="button"
+            aria-label="Resize sidebar"
+            className="absolute top-0 -right-1 bottom-0 hidden w-2 cursor-col-resize border-none bg-transparent p-0 md:block"
             onMouseDown={handleResizeStart}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowLeft') {
+                setSidebarWidth((prev) => Math.max(SIDEBAR_MIN_WIDTH, prev - 10))
+              } else if (e.key === 'ArrowRight') {
+                setSidebarWidth((prev) => Math.min(SIDEBAR_MAX_WIDTH, prev + 10))
+              }
+            }}
           >
             <div
               className={`absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 transition-colors ${
                 isResizing ? 'bg-primary' : 'hover:bg-border bg-transparent'
               }`}
             />
-          </div>
+          </button>
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-2 md:p-3">
+        <nav className="flex-1 overflow-y-auto p-1.5 md:p-3">
           <SidebarFeedsSection
             isSidebarOpen={isSidebarOpen}
             isMobileSidebarOpen={isMobileSidebarOpen}
@@ -457,7 +546,7 @@ export function Layout() {
             setDragOverFolderId={setDragOverFolderId}
           />
 
-          <div className="border-border my-2 border-t md:my-3" />
+          <div className="border-border my-1.5 border-t md:my-3" />
 
           <SidebarBookmarksSection
             isSidebarOpen={isSidebarOpen}
@@ -476,7 +565,7 @@ export function Layout() {
             onDeleteFolder={deleteFolder}
           />
 
-          <div className="border-border my-2 border-t md:my-3" />
+          <div className="border-border my-1.5 border-t md:my-3" />
 
           <SidebarTagsSection
             isSidebarOpen={isSidebarOpen}

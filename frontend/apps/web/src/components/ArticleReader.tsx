@@ -15,6 +15,7 @@ import {
   Minimize2,
   X,
   ChevronLeft,
+  Menu as MenuIcon,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { processHtmlContent } from '../lib/html'
@@ -87,10 +88,15 @@ function useScrollHide(scrollContainerRef: React.RefObject<HTMLDivElement | null
     if (!scrollContainerRef.current) return
 
     const currentScrollY = scrollContainerRef.current.scrollTop
+    const scrollHeight = scrollContainerRef.current.scrollHeight
+    const clientHeight = scrollContainerRef.current.clientHeight
     const scrollDelta = currentScrollY - lastScrollY.current
 
-    // Show bars when at top or scrolling up
-    if (currentScrollY < 50) {
+    // Check if scrolled to bottom (with 10px tolerance)
+    const isAtBottom = scrollHeight - currentScrollY - clientHeight < 10
+
+    // Show bars when at top, at bottom, or scrolling up
+    if (currentScrollY < 50 || isAtBottom) {
       setIsVisible(true)
     } else if (scrollDelta > 5) {
       // Scrolling down - hide
@@ -139,6 +145,11 @@ export function ArticleReader({
 }: ArticleReaderProps) {
   const { t } = useTranslation('reader')
   const queryClient = useQueryClient()
+
+  const handleOpenMenu = () => {
+    // Dispatch custom event to open mobile sidebar in Layout
+    window.dispatchEvent(new CustomEvent('openMobileSidebar'))
+  }
   const updateMutation = useUpdateEntryState()
   const contentRef = useContentRenderer(entry.content || entry.summary || undefined)
   const [isBookmarking, setIsBookmarking] = useState(false)
@@ -202,13 +213,20 @@ export function ArticleReader({
             barsVisible ? 'translate-y-0' : '-translate-y-full'
           }`}
         >
-          <div className="flex h-12 items-center gap-2 px-3">
-            {showCloseButton && onClose && (
+          <div className="flex h-14 items-center gap-2 px-4">
+            {showCloseButton && onClose ? (
               <button
                 onClick={onClose}
-                className="text-muted-foreground hover:bg-accent hover:text-foreground flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors"
+                className="text-muted-foreground hover:bg-accent hover:text-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors"
               >
                 <ChevronLeft className="h-5 w-5" />
+              </button>
+            ) : (
+              <button
+                onClick={handleOpenMenu}
+                className="text-muted-foreground hover:bg-accent hover:text-foreground flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors"
+              >
+                <MenuIcon className="h-5 w-5" />
               </button>
             )}
             <h1 className="text-foreground min-w-0 flex-1 truncate text-base font-semibold">
@@ -324,7 +342,7 @@ export function ArticleReader({
         {/* Scrollable content area - hide scrollbar for cleaner reading */}
         <div
           ref={scrollContainerRef}
-          className={`hide-scrollbar flex-1 overflow-y-auto ${isMobile ? 'pt-12 pb-16' : ''}`}
+          className={`hide-scrollbar flex-1 overflow-y-auto ${isMobile ? 'pt-14 pb-16' : ''}`}
         >
           <div
             className={`px-4 py-6 sm:px-6 sm:py-8 ${!isMobile ? 'mx-auto max-w-3xl' : 'max-w-3xl'}`}
@@ -418,9 +436,7 @@ export function ArticleReader({
               >
                 <CheckCheck className="h-5 w-5" />
                 <span className="text-[10px]">
-                  {entry.is_read
-                    ? t('actions.markUnread').slice(5)
-                    : t('actions.markRead').slice(5)}
+                  {entry.is_read ? t('filters.unread') : t('actions.markRead')}
                 </span>
               </button>
             )}

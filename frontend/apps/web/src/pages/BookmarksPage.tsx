@@ -31,7 +31,6 @@ import { format } from 'date-fns'
 import {
   Button,
   Input,
-  Badge,
   Skeleton,
   AlertDialog,
   AlertDialogPopup,
@@ -218,99 +217,129 @@ export default function BookmarksPage() {
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Header */}
           <header className="border-border bg-card border-b px-4 py-3 sm:px-6 sm:py-4">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
+            {/* Title row with view toggle */}
+            <div className="mb-3 flex items-center justify-between gap-3 md:mb-0">
               <h1 className="font-display text-foreground shrink-0 text-xl font-bold">
                 {t('title')}
               </h1>
-              <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
-                {/* View Toggle */}
-                <div className="border-border flex shrink-0 rounded-lg border p-0.5">
-                  <button
-                    onClick={() => setViewMode('grid')}
-                    className={`rounded-md p-1.5 transition-colors ${
-                      viewMode === 'grid'
-                        ? 'bg-muted text-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                    title={t('view.grid')}
-                  >
-                    <LayoutGrid className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setViewMode('list')}
-                    className={`rounded-md p-1.5 transition-colors ${
-                      viewMode === 'list'
-                        ? 'bg-muted text-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                    title={t('view.list')}
-                  >
-                    <List className="h-4 w-4" />
-                  </button>
-                </div>
-                <div className="relative w-full sm:w-64">
-                  <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2" />
-                  <Input
-                    type="text"
-                    placeholder={t('placeholders.searchBookmarks')}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full [&_input]:pl-9"
-                  />
-                </div>
-                <Button
-                  onClick={() => setShowCreateBookmark(true)}
-                  className="w-full shrink-0 whitespace-nowrap sm:w-auto"
+              {/* View Toggle - always visible next to title */}
+              <div className="border-border flex shrink-0 rounded-lg border p-0.5 md:hidden">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`flex items-center justify-center rounded-md px-3 py-1.5 transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-muted text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                  title={t('view.grid')}
                 >
-                  <Plus className="h-4 w-4" />
-                  {t('actions.addBookmark')}
-                </Button>
+                  <LayoutGrid className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`flex items-center justify-center rounded-md px-3 py-1.5 transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-muted text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                  title={t('view.list')}
+                >
+                  <List className="h-4 w-4" />
+                </button>
               </div>
+            </div>
+
+            {/* Search and actions row */}
+            <div className="flex items-center gap-2 sm:gap-3 md:flex-row md:items-center md:justify-between">
+              {/* Desktop view toggle */}
+              <div className="border-border hidden shrink-0 rounded-lg border p-0.5 md:flex">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`flex items-center justify-center rounded-md p-1.5 transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-muted text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                  title={t('view.grid')}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`flex items-center justify-center rounded-md p-1.5 transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-muted text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                  title={t('view.list')}
+                >
+                  <List className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="relative min-w-0 flex-1 md:max-w-64">
+                <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2" />
+                <Input
+                  type="text"
+                  placeholder={t('placeholders.searchBookmarks')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-10 w-full [&_input]:pl-9"
+                />
+              </div>
+              <Button
+                onClick={() => setShowCreateBookmark(true)}
+                className="h-10 shrink-0 whitespace-nowrap"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">{t('actions.addBookmark')}</span>
+              </Button>
             </div>
 
             {/* Active filters */}
             {(selectedFolder || selectedTag || searchQuery) && (
-              <div className="mt-3 flex flex-wrap items-center gap-2">
+              <div className="mt-3 flex flex-wrap items-center gap-1.5">
                 <span className="text-muted-foreground text-xs">{t('filters.label')}</span>
                 {selectedFolder && (
-                  <Badge variant="secondary" className="gap-1">
+                  <span className="bg-muted text-muted-foreground inline-flex items-center gap-1 rounded-full py-1 pr-1 pl-2 text-xs">
                     <FolderOpen className="h-3 w-3" />
-                    {findFolderName(bookmarkFolders, selectedFolder)}
+                    <span className="max-w-24 truncate">
+                      {findFolderName(bookmarkFolders, selectedFolder)}
+                    </span>
                     <button
                       onClick={() => clearFilter('folder')}
-                      className="hover:text-foreground ml-1"
+                      className="touch-target-none hover:bg-accent hover:text-foreground rounded p-0.5 transition-colors"
                     >
                       <X className="h-3 w-3" />
                     </button>
-                  </Badge>
+                  </span>
                 )}
                 {selectedTag &&
                   (() => {
                     const tag = tags.find((t) => t.id === selectedTag)
                     return tag ? (
-                      <Badge variant="secondary" className="gap-1">
+                      <span className="bg-muted text-muted-foreground inline-flex items-center gap-1 rounded-full py-1 pr-1 pl-2 text-xs">
                         <Tag className="h-3 w-3" />
-                        {tag.name}
+                        <span className="max-w-24 truncate">{tag.name}</span>
                         <button
                           onClick={() => clearFilter('tag')}
-                          className="hover:text-foreground ml-1"
+                          className="touch-target-none hover:bg-accent hover:text-foreground rounded p-0.5 transition-colors"
                         >
                           <X className="h-3 w-3" />
                         </button>
-                      </Badge>
+                      </span>
                     ) : null
                   })()}
                 {searchQuery && (
-                  <Badge variant="secondary" className="gap-1">
+                  <span className="bg-muted text-muted-foreground inline-flex items-center gap-1 rounded-full py-1 pr-1 pl-2 text-xs">
                     <Search className="h-3 w-3" />
-                    &quot;{searchQuery}&quot;
+                    <span className="max-w-24 truncate">&quot;{searchQuery}&quot;</span>
                     <button
                       onClick={() => clearFilter('search')}
-                      className="hover:text-foreground ml-1"
+                      className="touch-target-none hover:bg-accent hover:text-foreground rounded p-0.5 transition-colors"
                     >
                       <X className="h-3 w-3" />
                     </button>
-                  </Badge>
+                  </span>
                 )}
               </div>
             )}
@@ -408,21 +437,25 @@ export default function BookmarksPage() {
 
           {/* Pagination */}
           {pages > 1 && (
-            <div className="border-border bg-card flex items-center justify-between border-t px-6 py-4">
-              <span className="text-muted-foreground text-sm">
+            <div className="border-border bg-card flex items-center justify-between border-t px-4 py-3 sm:px-6 sm:py-4">
+              <span className="text-muted-foreground hidden text-sm sm:block">
                 {t('pagination.showing', { count: bookmarks.length, total })}
               </span>
-              <div className="flex items-center gap-2">
+              <span className="text-muted-foreground text-sm sm:hidden">
+                {page} / {pages}
+              </span>
+              <div className="flex items-center gap-1 sm:gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => handlePageChange(page - 1)}
                   disabled={page === 1}
+                  className="gap-1"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                  {t('pagination.previous')}
+                  <span className="hidden sm:inline">{t('pagination.previous')}</span>
                 </Button>
-                <span className="text-muted-foreground text-sm">
+                <span className="text-muted-foreground hidden text-sm sm:block">
                   {page} / {pages}
                 </span>
                 <Button
@@ -430,8 +463,9 @@ export default function BookmarksPage() {
                   size="sm"
                   onClick={() => handlePageChange(page + 1)}
                   disabled={page === pages}
+                  className="gap-1"
                 >
-                  {t('pagination.next')}
+                  <span className="hidden sm:inline">{t('pagination.next')}</span>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -618,11 +652,11 @@ function BookmarkCard({
       )}
 
       {/* Tags with Add Button */}
-      <div className="mb-3 flex flex-wrap items-center gap-1">
+      <div className="mb-3 flex flex-wrap items-center gap-1.5">
         {bookmark.tags.map((tag) => (
           <span
             key={tag.id}
-            className="bg-muted text-muted-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
+            className="bg-muted text-muted-foreground inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs"
           >
             {tag.color && (
               <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: tag.color }} />
@@ -634,10 +668,10 @@ function BookmarkCard({
         {/* Tag Combobox */}
         <Menu>
           <MenuTrigger
-            className="border-muted-foreground/30 text-muted-foreground hover:border-primary hover:text-primary inline-flex items-center gap-1 rounded-full border border-dashed px-2 py-0.5 text-xs transition-colors"
+            render={<span />}
+            className="border-muted-foreground/30 text-muted-foreground hover:border-primary hover:text-primary inline-flex cursor-pointer items-center gap-1 rounded-full border border-dashed px-2 py-1 text-xs transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
-            <Tags className="h-3 w-3" />
             <Plus className="h-3 w-3" />
           </MenuTrigger>
           <MenuPopup align="start" sideOffset={4} className="w-56">
@@ -742,13 +776,13 @@ function BookmarkCard({
             </span>
           )}
         </div>
-        <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="flex items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
           <button
             onClick={(e) => {
               e.stopPropagation()
               onEdit()
             }}
-            className="hover:bg-accent hover:text-foreground rounded p-1"
+            className="hover:bg-accent hover:text-foreground touch-target-sm flex items-center justify-center rounded p-1.5 sm:p-1"
             title={t('common.edit')}
           >
             <Edit3 className="h-4 w-4" />
@@ -759,7 +793,7 @@ function BookmarkCard({
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="hover:bg-accent hover:text-foreground rounded p-1"
+              className="hover:bg-accent hover:text-foreground touch-target-sm flex items-center justify-center rounded p-1.5 sm:p-1"
               title={t('common.openExternalLink')}
             >
               <ExternalLink className="h-4 w-4" />
@@ -770,7 +804,7 @@ function BookmarkCard({
               e.stopPropagation()
               onDelete()
             }}
-            className="text-destructive hover:bg-destructive/10 rounded p-1"
+            className="text-destructive hover:bg-destructive/10 touch-target-sm flex items-center justify-center rounded p-1.5 sm:p-1"
             title={t('common.delete')}
           >
             <Trash2 className="h-4 w-4" />
@@ -876,11 +910,11 @@ function BookmarkListItem({
       </button>
 
       {/* Tags */}
-      <div className="hidden shrink-0 items-center gap-1 md:flex">
+      <div className="hidden shrink-0 items-center gap-1.5 md:flex">
         {bookmark.tags.slice(0, 2).map((tag) => (
           <span
             key={tag.id}
-            className="bg-muted text-muted-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
+            className="bg-muted text-muted-foreground inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs"
           >
             {tag.color && (
               <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: tag.color }} />
@@ -895,11 +929,11 @@ function BookmarkListItem({
         {/* Tag Combobox */}
         <Menu>
           <MenuTrigger
-            className="border-muted-foreground/30 text-muted-foreground hover:border-primary hover:text-primary inline-flex items-center gap-0.5 rounded-full border border-dashed px-1.5 py-0.5 text-xs opacity-0 transition-all group-hover:opacity-100"
+            render={<span />}
+            className="border-muted-foreground/30 text-muted-foreground hover:border-primary hover:text-primary inline-flex cursor-pointer items-center gap-1 rounded-full border border-dashed px-2 py-1 text-xs opacity-0 transition-all group-hover:opacity-100"
             onClick={(e) => e.stopPropagation()}
           >
-            <Tags className="h-3 w-3" />
-            <Plus className="h-2.5 w-2.5" />
+            <Plus className="h-3 w-3" />
           </MenuTrigger>
           <MenuPopup align="end" sideOffset={4} className="w-56">
             {/* Search Input */}
@@ -1007,13 +1041,13 @@ function BookmarkListItem({
       </div>
 
       {/* Actions */}
-      <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="flex shrink-0 items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
         <button
           onClick={(e) => {
             e.stopPropagation()
             onEdit()
           }}
-          className="hover:bg-accent hover:text-foreground rounded p-1.5"
+          className="hover:bg-accent hover:text-foreground touch-target-sm flex items-center justify-center rounded p-2 sm:p-1.5"
           title={t('common.edit')}
         >
           <Edit3 className="h-4 w-4" />
@@ -1024,7 +1058,7 @@ function BookmarkListItem({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="hover:bg-accent hover:text-foreground rounded p-1.5"
+            className="hover:bg-accent hover:text-foreground touch-target-sm flex items-center justify-center rounded p-2 sm:p-1.5"
             title={t('common.openExternalLink')}
           >
             <ExternalLink className="h-4 w-4" />
@@ -1035,7 +1069,7 @@ function BookmarkListItem({
             e.stopPropagation()
             onDelete()
           }}
-          className="text-destructive hover:bg-destructive/10 rounded p-1.5"
+          className="text-destructive hover:bg-destructive/10 touch-target-sm flex items-center justify-center rounded p-2 sm:p-1.5"
           title={t('common.delete')}
         >
           <Trash2 className="h-4 w-4" />

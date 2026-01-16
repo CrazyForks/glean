@@ -30,6 +30,7 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
+  Switch,
 } from '@glean/ui'
 import { SubscriptionsTab } from '../components/tabs/SubscriptionsTab'
 import { PreferenceTab } from '../components/tabs/PreferenceTab'
@@ -221,19 +222,11 @@ export default function SettingsPage() {
               </p>
             </div>
           </div>
-          <button
-            onClick={handleToggleShowRemaining}
+          <Switch
+            checked={showReadLaterRemaining}
+            onCheckedChange={handleToggleShowRemaining}
             disabled={isSaving || isLoading}
-            className={`relative h-6 w-11 shrink-0 rounded-full transition-all duration-200 ${
-              showReadLaterRemaining ? 'bg-primary shadow-primary/50 shadow-sm' : 'bg-muted'
-            } ${isSaving || isLoading ? 'cursor-not-allowed opacity-50' : 'hover:shadow-md'}`}
-          >
-            <span
-              className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-200 ${
-                showReadLaterRemaining ? 'translate-x-5' : 'translate-x-0'
-              }`}
-            />
-          </button>
+          />
         </div>
       </div>
 
@@ -289,44 +282,50 @@ export default function SettingsPage() {
     return (
       <div className="w-full space-y-6">
         <div className="w-full">
-          <Label className="text-muted-foreground mb-6 block text-sm font-medium">
+          <Label className="text-muted-foreground mb-4 block text-sm font-medium">
             {t('appearance.chooseTheme')}
           </Label>
-          <div className="stagger-children grid w-full grid-cols-1 gap-6 sm:grid-cols-3">
+          <div className="stagger-children grid w-full grid-cols-3 gap-2 md:gap-6">
             {themeOptions.map(({ value, icon: Icon, label, description, preview }, index) => (
               <button
                 key={value}
                 onClick={() => setTheme(value)}
-                className={`group animate-fade-in relative flex flex-col items-center gap-4 rounded-2xl border p-6 text-center transition-all duration-200 ${
+                className={`group animate-fade-in relative flex flex-col items-center gap-2 rounded-xl border p-2 text-center transition-all duration-200 md:gap-4 md:rounded-2xl md:p-6 ${
                   theme === value
-                    ? 'border-primary/50 from-primary/10 to-primary/5 ring-primary/30 scale-105 bg-gradient-to-br shadow-lg ring-2'
-                    : 'border-border/50 from-muted/30 to-muted/10 hover:border-primary/30 bg-gradient-to-br hover:scale-105 hover:shadow-lg'
+                    ? 'border-primary/50 from-primary/10 to-primary/5 ring-primary/30 bg-gradient-to-br shadow-lg ring-2 md:scale-105'
+                    : 'border-border/50 from-muted/30 to-muted/10 hover:border-primary/30 bg-gradient-to-br hover:shadow-lg md:hover:scale-105'
                 }`}
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 {/* Selected indicator */}
                 {theme === value && (
-                  <div className="bg-primary ring-background absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full shadow-md ring-2">
-                    <CheckCircle className="text-primary-foreground h-4 w-4" />
+                  <div className="bg-primary ring-background absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full shadow-md ring-2 md:-top-2 md:-right-2 md:h-7 md:w-7">
+                    <CheckCircle className="text-primary-foreground h-3 w-3 md:h-4 md:w-4" />
                   </div>
                 )}
 
                 {/* Theme preview with color blocks */}
-                <div className="ring-border/50 relative h-24 w-full overflow-hidden rounded-xl shadow-sm ring-1">
+                <div className="ring-border/50 relative h-16 w-full overflow-hidden rounded-lg shadow-sm ring-1 md:h-24 md:rounded-xl">
                   {/* Background */}
                   <div className={`absolute inset-0 ${preview.bg}`} />
 
                   {/* Card overlay */}
-                  <div className="absolute inset-x-3 top-3 bottom-3 flex flex-col gap-1.5">
-                    <div className={`h-8 rounded-lg ${preview.card} shadow-sm`} />
-                    <div className="flex flex-1 gap-1.5">
-                      <div className={`flex-1 rounded-md ${preview.card} shadow-sm`} />
-                      <div className={`w-1/3 rounded-md ${preview.primary} shadow-sm`} />
+                  <div className="absolute inset-x-2 top-2 bottom-2 flex flex-col gap-1 md:inset-x-3 md:top-3 md:bottom-3 md:gap-1.5">
+                    <div
+                      className={`h-5 rounded-md md:h-8 md:rounded-lg ${preview.card} shadow-sm`}
+                    />
+                    <div className="flex flex-1 gap-1 md:gap-1.5">
+                      <div
+                        className={`flex-1 rounded-sm md:rounded-md ${preview.card} shadow-sm`}
+                      />
+                      <div
+                        className={`w-1/3 rounded-sm md:rounded-md ${preview.primary} shadow-sm`}
+                      />
                     </div>
                   </div>
 
                   {/* Text indicator dots */}
-                  <div className="absolute top-5 left-5 flex gap-1">
+                  <div className="absolute top-3 left-3 hidden gap-1 md:flex">
                     <div className={`h-1.5 w-8 rounded-full ${preview.text} opacity-40`} />
                     <div className={`h-1.5 w-4 rounded-full ${preview.text} opacity-30`} />
                   </div>
@@ -334,25 +333,27 @@ export default function SettingsPage() {
 
                 {/* Icon */}
                 <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-all ${
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-all md:h-10 md:w-10 md:rounded-lg ${
                     theme === value
-                      ? 'bg-primary/20 text-primary scale-110'
-                      : 'bg-muted/50 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary group-hover:scale-110'
+                      ? 'bg-primary/20 text-primary md:scale-110'
+                      : 'bg-muted/50 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary md:group-hover:scale-110'
                   }`}
                 >
-                  <Icon className="h-5 w-5" />
+                  <Icon className="h-4 w-4 md:h-5 md:w-5" />
                 </div>
 
                 {/* Label and description */}
-                <div className="space-y-1">
+                <div className="space-y-0.5 md:space-y-1">
                   <div
-                    className={`text-base font-semibold transition-colors ${
+                    className={`text-xs font-semibold transition-colors md:text-base ${
                       theme === value ? 'text-primary' : 'text-foreground group-hover:text-primary'
                     }`}
                   >
                     {label}
                   </div>
-                  <div className="text-muted-foreground text-xs leading-snug">{description}</div>
+                  <div className="text-muted-foreground hidden text-xs leading-snug md:block">
+                    {description}
+                  </div>
                 </div>
               </button>
             ))}
@@ -389,42 +390,42 @@ export default function SettingsPage() {
               <div className="border-border/50 from-muted/30 to-muted/10 w-full shrink-0 border-b bg-gradient-to-br backdrop-blur-sm md:w-56 md:overflow-y-auto md:border-r md:border-b-0">
                 <TabsList
                   variant="underline"
-                  className="flex h-auto w-full flex-row gap-0.5 bg-transparent p-2 md:flex-col md:gap-1 md:p-3"
+                  className="no-scrollbar flex h-auto w-full !flex-row gap-0 overflow-x-auto bg-transparent md:!flex-col md:gap-1 md:overflow-x-visible md:p-3 [&_[data-slot=tab-indicator]]:hidden md:[&_[data-slot=tab-indicator]]:block"
                 >
                   <TabsTab
                     value="profile"
-                    className="hover:bg-accent/80 data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full justify-start gap-2.5 rounded-md px-3 py-2.5 transition-all duration-200 data-[state=active]:font-medium"
+                    className="hover:bg-accent/80 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-primary flex-1 flex-col gap-0.5 rounded-none border-b-2 border-transparent px-2 py-2.5 transition-all duration-200 data-[state=active]:font-medium md:w-full md:flex-none md:flex-row md:justify-start md:gap-2.5 md:rounded-md md:border-b-0 md:px-3 md:py-2.5"
                   >
-                    <User className="h-4 w-4 shrink-0" />
-                    <span className="hidden sm:inline">{t('tabs.profile')}</span>
+                    <User className="h-5 w-5 shrink-0 md:h-4 md:w-4" />
+                    <span className="text-[10px] md:text-sm">{t('tabs.profile')}</span>
                   </TabsTab>
                   <TabsTab
                     value="read-later"
-                    className="hover:bg-accent/80 data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full justify-start gap-2.5 rounded-md px-3 py-2.5 transition-all duration-200 data-[state=active]:font-medium"
+                    className="hover:bg-accent/80 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-primary flex-1 flex-col gap-0.5 rounded-none border-b-2 border-transparent px-2 py-2.5 transition-all duration-200 data-[state=active]:font-medium md:w-full md:flex-none md:flex-row md:justify-start md:gap-2.5 md:rounded-md md:border-b-0 md:px-3 md:py-2.5"
                   >
-                    <Clock className="h-4 w-4 shrink-0" />
-                    <span className="hidden sm:inline">{t('tabs.readLater')}</span>
+                    <Clock className="h-5 w-5 shrink-0 md:h-4 md:w-4" />
+                    <span className="text-[10px] md:text-sm">{t('tabs.readLater')}</span>
                   </TabsTab>
                   <TabsTab
                     value="appearance"
-                    className="hover:bg-accent/80 data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full justify-start gap-2.5 rounded-md px-3 py-2.5 transition-all duration-200 data-[state=active]:font-medium"
+                    className="hover:bg-accent/80 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-primary flex-1 flex-col gap-0.5 rounded-none border-b-2 border-transparent px-2 py-2.5 transition-all duration-200 data-[state=active]:font-medium md:w-full md:flex-none md:flex-row md:justify-start md:gap-2.5 md:rounded-md md:border-b-0 md:px-3 md:py-2.5"
                   >
-                    <Sun className="h-4 w-4 shrink-0" />
-                    <span className="hidden sm:inline">{t('tabs.appearance')}</span>
+                    <Sun className="h-5 w-5 shrink-0 md:h-4 md:w-4" />
+                    <span className="text-[10px] md:text-sm">{t('tabs.appearance')}</span>
                   </TabsTab>
                   <TabsTab
                     value="manage-feeds"
-                    className="hover:bg-accent/80 data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full justify-start gap-2.5 rounded-md px-3 py-2.5 transition-all duration-200 data-[state=active]:font-medium"
+                    className="hover:bg-accent/80 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-primary flex-1 flex-col gap-0.5 rounded-none border-b-2 border-transparent px-2 py-2.5 transition-all duration-200 data-[state=active]:font-medium md:w-full md:flex-none md:flex-row md:justify-start md:gap-2.5 md:rounded-md md:border-b-0 md:px-3 md:py-2.5"
                   >
-                    <ListChecks className="h-4 w-4 shrink-0" />
-                    <span className="hidden sm:inline">{t('tabs.manageFeeds')}</span>
+                    <ListChecks className="h-5 w-5 shrink-0 md:h-4 md:w-4" />
+                    <span className="text-[10px] md:text-sm">{t('tabs.manageFeeds')}</span>
                   </TabsTab>
                   <TabsTab
                     value="preferences"
-                    className="hover:bg-accent/80 data-[state=active]:bg-primary/10 data-[state=active]:text-primary w-full justify-start gap-2.5 rounded-md px-3 py-2.5 transition-all duration-200 data-[state=active]:font-medium"
+                    className="hover:bg-accent/80 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-primary flex-1 flex-col gap-0.5 rounded-none border-b-2 border-transparent px-2 py-2.5 transition-all duration-200 data-[state=active]:font-medium md:w-full md:flex-none md:flex-row md:justify-start md:gap-2.5 md:rounded-md md:border-b-0 md:px-3 md:py-2.5"
                   >
-                    <Sparkles className="h-4 w-4 shrink-0" />
-                    <span className="hidden sm:inline">{t('tabs.preferences')}</span>
+                    <Sparkles className="h-5 w-5 shrink-0 md:h-4 md:w-4" />
+                    <span className="text-[10px] md:text-sm">{t('tabs.preferences')}</span>
                   </TabsTab>
                 </TabsList>
               </div>

@@ -27,6 +27,7 @@ import {
   DialogFooter,
   Input,
   Label,
+  cn,
 } from '@glean/ui'
 import {
   ChevronRight,
@@ -40,6 +41,7 @@ import {
   Sparkles,
   FolderInput,
   Folder,
+  FolderOpen,
   Trash2,
   Pencil,
   MoreHorizontal as MoreIcon,
@@ -53,35 +55,36 @@ import {
 } from '../../hooks/useSubscriptions'
 import { useMarkAllRead } from '../../hooks/useEntries'
 import { useFolderStore } from '../../stores/folderStore'
+import { SidebarItem } from './SidebarItem'
 
 interface SidebarFeedsSectionProps {
-  isSidebarOpen: boolean
-  isMobileSidebarOpen: boolean
-  isFeedsSectionExpanded: boolean
-  onToggleFeedsSection: () => void
-  onAddFeed: () => void
-  onCreateFolder: (parentId: string | null) => void
-  onRefreshAll: () => void
-  refreshAllPending: boolean
-  onImportOPML: () => void
-  importPending: boolean
-  onExportOPML: () => void
-  exportPending: boolean
-  onFeedSelect: (feedId?: string, folderId?: string) => void
-  onSmartViewSelect: () => void
-  isSmartView: boolean
-  isReaderPage: boolean
-  currentFeedId?: string
-  currentFolderId?: string
-  feedFolders: FolderTreeNode[]
-  subscriptionsByFolder: Record<string, Subscription[]>
-  ungroupedSubscriptions: Subscription[]
-  expandedFolders: Set<string>
-  toggleFolder: (folderId: string) => void
-  draggedFeed: Subscription | null
-  setDraggedFeed: (feed: Subscription | null) => void
-  dragOverFolderId: string | null
-  setDragOverFolderId: (id: string | null) => void
+  readonly isSidebarOpen: boolean
+  readonly isMobileSidebarOpen: boolean
+  readonly isFeedsSectionExpanded: boolean
+  readonly onToggleFeedsSection: () => void
+  readonly onAddFeed: () => void
+  readonly onCreateFolder: (parentId: string | null) => void
+  readonly onRefreshAll: () => void
+  readonly refreshAllPending: boolean
+  readonly onImportOPML: () => void
+  readonly importPending: boolean
+  readonly onExportOPML: () => void
+  readonly exportPending: boolean
+  readonly onFeedSelect: (feedId?: string, folderId?: string) => void
+  readonly onSmartViewSelect: () => void
+  readonly isSmartView: boolean
+  readonly isReaderPage: boolean
+  readonly currentFeedId?: string
+  readonly currentFolderId?: string
+  readonly feedFolders: FolderTreeNode[]
+  readonly subscriptionsByFolder: Record<string, Subscription[]>
+  readonly ungroupedSubscriptions: Subscription[]
+  readonly expandedFolders: Set<string>
+  readonly toggleFolder: (folderId: string) => void
+  readonly draggedFeed: Subscription | null
+  readonly setDraggedFeed: (feed: Subscription | null) => void
+  readonly dragOverFolderId: string | null
+  readonly setDragOverFolderId: (id: string | null) => void
 }
 
 export function SidebarFeedsSection({
@@ -186,60 +189,27 @@ export function SidebarFeedsSection({
 
       {isFeedsSectionExpanded && (
         <>
-          <button
+          <SidebarItem
+            icon={<Sparkles />}
+            label={t('sidebar.smart')}
+            isActive={isSmartView}
             onClick={onSmartViewSelect}
-            className={`group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-all duration-300 md:gap-3 md:px-3 md:py-2.5 ${
-              isSmartView
-                ? 'bg-primary/10 text-primary scale-[1.02] shadow-sm'
-                : 'text-muted-foreground hover:bg-accent hover:text-foreground hover:scale-[1.01]'
-            } ${!isSidebarOpen && !isMobileSidebarOpen ? 'justify-center' : ''}`}
-            title={!isSidebarOpen && !isMobileSidebarOpen ? t('sidebar.smart') : undefined}
-          >
-            <span
-              className={`shrink-0 transition-transform duration-300 ${
-                isSmartView
-                  ? 'text-primary scale-110'
-                  : 'text-muted-foreground group-hover:text-foreground group-hover:scale-105'
-              }`}
-            >
-              <Sparkles className="h-4 w-4 md:h-5 md:w-5" />
-            </span>
-            {(isSidebarOpen || isMobileSidebarOpen) && <span>{t('sidebar.smart')}</span>}
-            {isSmartView && (isSidebarOpen || isMobileSidebarOpen) && (
-              <span className="bg-primary ml-auto h-1.5 w-1.5 animate-pulse rounded-full" />
-            )}
-          </button>
+            isSidebarCollapsed={!isSidebarOpen && !isMobileSidebarOpen}
+            title={t('sidebar.smart')}
+          />
 
-          <button
+          <SidebarItem
+            icon={<Inbox />}
+            label={t('sidebar.allFeeds')}
+            isActive={isReaderPage && !currentFeedId && !currentFolderId && !isSmartView}
             onClick={() => onFeedSelect(undefined)}
-            className={`group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-all duration-300 md:gap-3 md:px-3 md:py-2.5 ${
-              isReaderPage && !currentFeedId && !currentFolderId && !isSmartView
-                ? 'bg-primary/10 text-primary scale-[1.02] shadow-sm'
-                : 'text-muted-foreground hover:bg-accent hover:text-foreground hover:scale-[1.01]'
-            } ${!isSidebarOpen && !isMobileSidebarOpen ? 'justify-center' : ''}`}
-            title={!isSidebarOpen && !isMobileSidebarOpen ? t('sidebar.allFeeds') : undefined}
-          >
-            <span
-              className={`shrink-0 transition-transform duration-300 ${
-                isReaderPage && !currentFeedId && !currentFolderId && !isSmartView
-                  ? 'text-primary scale-110'
-                  : 'text-muted-foreground group-hover:text-foreground group-hover:scale-105'
-              }`}
-            >
-              <Inbox className="h-4 w-4 md:h-5 md:w-5" />
-            </span>
-            {(isSidebarOpen || isMobileSidebarOpen) && <span>{t('sidebar.allFeeds')}</span>}
-            {isReaderPage &&
-              !currentFeedId &&
-              !currentFolderId &&
-              !isSmartView &&
-              (isSidebarOpen || isMobileSidebarOpen) && (
-                <span className="bg-primary ml-auto h-1.5 w-1.5 rounded-full" />
-              )}
-          </button>
+            isSidebarCollapsed={!isSidebarOpen && !isMobileSidebarOpen}
+            title={t('sidebar.allFeeds')}
+            className="mt-0.5"
+          />
 
           {(isSidebarOpen || isMobileSidebarOpen) && feedFolders.length > 0 && (
-            <div className="mt-1 space-y-0.5">
+            <div className="space-y-0.5">
               {feedFolders.map((folder) => (
                 <SidebarFolderItem
                   key={folder.id}
@@ -267,9 +237,10 @@ export function SidebarFeedsSection({
           )}
 
           {(isSidebarOpen || isMobileSidebarOpen) &&
-            draggedFeed &&
+            draggedFeed !== null &&
             draggedFeed.folder_id !== null && (
-              <div
+              <section
+                aria-label={t('common.removeFromFolder')}
                 className={`mt-2 flex items-center justify-center gap-2 rounded-lg border-2 border-dashed px-3 py-2 text-xs transition-all ${
                   dragOverFolderId === '__uncategorized__'
                     ? 'border-primary bg-primary/10 text-primary'
@@ -294,11 +265,11 @@ export function SidebarFeedsSection({
               >
                 <FolderInput className="h-4 w-4" />
                 <span>{t('common.removeFromFolder')}</span>
-              </div>
+              </section>
             )}
 
           {(isSidebarOpen || isMobileSidebarOpen) && ungroupedSubscriptions.length > 0 && (
-            <div className="mt-1 space-y-0.5 pl-2">
+            <div className="mt-1 space-y-0.5">
               {ungroupedSubscriptions.map((sub) => (
                 <SidebarFeedItem
                   key={sub.id}
@@ -323,24 +294,24 @@ export function SidebarFeedsSection({
 }
 
 interface SidebarFolderItemProps {
-  folder: FolderTreeNode
-  isExpanded: boolean
-  onToggle: () => void
-  onSelect: (folderId: string) => void
-  isActive: boolean
-  subscriptions: Subscription[]
-  subscriptionsByFolder: Record<string, Subscription[]>
-  expandedFolders: Set<string>
-  toggleFolder: (folderId: string) => void
-  currentFeedId?: string
-  currentFolderId?: string
-  onFeedSelect: (feedId: string) => void
-  allFolders: FolderTreeNode[]
-  onCreateSubfolder: () => void
-  draggedFeed: Subscription | null
-  setDraggedFeed: (feed: Subscription | null) => void
-  dragOverFolderId: string | null
-  setDragOverFolderId: (id: string | null) => void
+  readonly folder: FolderTreeNode
+  readonly isExpanded: boolean
+  readonly onToggle: () => void
+  readonly onSelect: (folderId: string) => void
+  readonly isActive: boolean
+  readonly subscriptions: Subscription[]
+  readonly subscriptionsByFolder: Record<string, Subscription[]>
+  readonly expandedFolders: Set<string>
+  readonly toggleFolder: (folderId: string) => void
+  readonly currentFeedId?: string
+  readonly currentFolderId?: string
+  readonly onFeedSelect: (feedId: string) => void
+  readonly allFolders: FolderTreeNode[]
+  readonly onCreateSubfolder: () => void
+  readonly draggedFeed: Subscription | null
+  readonly setDraggedFeed: (feed: Subscription | null) => void
+  readonly dragOverFolderId: string | null
+  readonly setDragOverFolderId: (id: string | null) => void
 }
 
 function SidebarFolderItem({
@@ -424,30 +395,62 @@ function SidebarFolderItem({
     setIsMenuOpen(true)
   }
 
+  const getContainerClasses = () => {
+    if (isDragTarget && canReceiveDrop) {
+      return 'bg-primary/10 ring-primary/30 ring-2'
+    }
+    if (isActive) {
+      return 'bg-primary/10 text-primary scale-[1.01] font-medium shadow-sm'
+    }
+    return 'text-muted-foreground hover:bg-accent hover:text-foreground hover:scale-[1.01]'
+  }
+
   return (
     <div>
-      <div
-        className={`group flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm transition-all duration-200 md:px-3 md:py-2 ${
-          isDragTarget && canReceiveDrop
-            ? 'bg-primary/10 ring-primary/30 ring-2'
-            : isActive
-              ? 'bg-primary/10 text-primary font-medium'
-              : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-        }`}
+      <button
+        type="button"
+        className={cn(
+          'group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200',
+          getContainerClasses()
+        )}
         onContextMenu={handleContextMenu}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        onClick={() => onSelect(folder.id)}
       >
-        <button onClick={onToggle} className="flex items-center gap-2">
+        <button onClick={onToggle} className="touch-target-none flex h-5 items-center gap-2.5">
           <ChevronRight
-            className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${
-              isExpanded ? 'rotate-90' : ''
-            }`}
+            className={cn(
+              'h-3 w-3 shrink-0 transition-transform duration-200',
+              isExpanded && 'rotate-90'
+            )}
           />
-          <Folder className="h-4 w-4 shrink-0" />
+          <span className="relative flex h-4 w-4 shrink-0 items-center justify-center">
+            <Folder
+              className="absolute h-4 w-4"
+              style={{
+                opacity: isExpanded ? 0 : 1,
+                transform: isExpanded ? 'scale(0.5) rotate(-15deg)' : 'scale(1) rotate(0deg)',
+                transition:
+                  'transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
+            />
+            <FolderOpen
+              className="absolute h-4 w-4"
+              style={{
+                opacity: isExpanded ? 1 : 0,
+                transform: isExpanded ? 'scale(1) rotate(0deg)' : 'scale(0.5) rotate(15deg)',
+                transition:
+                  'transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
+            />
+          </span>
         </button>
-        <button onClick={() => onSelect(folder.id)} className="min-w-0 flex-1 truncate text-left">
+        <button
+          onClick={() => onSelect(folder.id)}
+          className="touch-target-none h-5 min-w-0 flex-1 truncate text-left"
+        >
           {folder.name}
         </button>
         {!isExpanded && totalUnread > 0 && (
@@ -457,7 +460,7 @@ function SidebarFolderItem({
         )}
 
         <Menu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-          <MenuTrigger className="text-muted-foreground hover:bg-accent hover:text-foreground rounded p-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+          <MenuTrigger className="touch-target-none text-muted-foreground hover:bg-accent hover:text-foreground h-5 rounded p-0.5 opacity-0 transition-opacity group-hover:opacity-100">
             <MoreIcon className="h-3.5 w-3.5" />
           </MenuTrigger>
           <MenuPopup align="end">
@@ -466,7 +469,7 @@ function SidebarFolderItem({
               disabled={markAllReadMutation.isPending}
             >
               <CheckCheck
-                className={`h-4 w-4 ${markAllReadMutation.isPending ? 'animate-pulse' : ''}`}
+                className={cn('h-4 w-4', markAllReadMutation.isPending && 'animate-pulse')}
               />
               <span>
                 {markAllReadMutation.isPending ? t('common.marking') : t('actions.markAllAsRead')}
@@ -488,7 +491,7 @@ function SidebarFolderItem({
             </MenuItem>
           </MenuPopup>
         </Menu>
-      </div>
+      </button>
 
       {isExpanded && (
         <div className="border-border mt-0.5 ml-4 space-y-0.5 border-l pl-2">
@@ -595,13 +598,13 @@ function SidebarFolderItem({
 }
 
 interface SidebarFeedItemProps {
-  subscription: Subscription
-  isActive: boolean
-  onClick: () => void
-  allFolders: FolderTreeNode[]
-  isDragging?: boolean
-  onDragStart?: () => void
-  onDragEnd?: () => void
+  readonly subscription: Subscription
+  readonly isActive: boolean
+  readonly onClick: () => void
+  readonly allFolders: FolderTreeNode[]
+  readonly isDragging?: boolean
+  readonly onDragStart?: () => void
+  readonly onDragEnd?: () => void
 }
 
 function SidebarFeedItem({
@@ -676,16 +679,24 @@ function SidebarFeedItem({
   }
   const flatFolders = flattenFolders(allFolders)
 
+  const getFeedItemClasses = () => {
+    if (isDragging) {
+      return 'opacity-50 border-2 border-dashed border-primary/50 bg-primary/5'
+    }
+    if (isActive) {
+      return 'bg-primary/10 text-primary scale-[1.01] font-medium shadow-sm'
+    }
+    return 'text-muted-foreground hover:bg-accent hover:text-foreground hover:scale-[1.01]'
+  }
+
   return (
     <>
-      <div
-        className={`group flex w-full cursor-grab items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm transition-all duration-200 active:cursor-grabbing md:gap-2.5 md:px-3 md:py-2 ${
-          isDragging
-            ? 'ring-primary/30 opacity-50 ring-2'
-            : isActive
-              ? 'bg-primary/10 text-primary font-medium'
-              : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-        }`}
+      <button
+        type="button"
+        className={cn(
+          'group flex w-full cursor-grab items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 active:cursor-grabbing',
+          getFeedItemClasses()
+        )}
         draggable
         onDragStart={(e) => {
           e.dataTransfer.effectAllowed = 'move'
@@ -693,13 +704,17 @@ function SidebarFeedItem({
         }}
         onDragEnd={onDragEnd}
         onContextMenu={handleContextMenu}
+        onClick={onClick}
       >
-        <button onClick={onClick} className="flex min-w-0 flex-1 items-center gap-2.5">
+        <button
+          onClick={onClick}
+          className="touch-target-none flex h-5 min-w-0 flex-1 items-center gap-3"
+        >
           {subscription.feed.icon_url ? (
             <img
               src={subscription.feed.icon_url}
               alt=""
-              className="h-4 w-4 shrink-0 rounded"
+              className="h-4 w-4 shrink-0 rounded object-cover"
               draggable={false}
             />
           ) : (
@@ -716,7 +731,7 @@ function SidebarFeedItem({
         )}
 
         <Menu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-          <MenuTrigger className="text-muted-foreground hover:bg-accent hover:text-foreground rounded p-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+          <MenuTrigger className="touch-target-none text-muted-foreground hover:bg-accent hover:text-foreground h-5 rounded p-0.5 opacity-0 transition-opacity group-hover:opacity-100">
             <MoreIcon className="h-3.5 w-3.5" />
           </MenuTrigger>
           <MenuPopup align="end">
@@ -725,7 +740,7 @@ function SidebarFeedItem({
               disabled={markAllReadMutation.isPending}
             >
               <CheckCheck
-                className={`h-4 w-4 ${markAllReadMutation.isPending ? 'animate-pulse' : ''}`}
+                className={cn('h-4 w-4', markAllReadMutation.isPending && 'animate-pulse')}
               />
               <span>
                 {markAllReadMutation.isPending ? t('common.marking') : t('actions.markAllAsRead')}
@@ -737,7 +752,7 @@ function SidebarFeedItem({
               <span>{t('common.edit')}</span>
             </MenuItem>
             <MenuItem onClick={handleRefresh} disabled={refreshMutation.isPending}>
-              <RefreshCw className={`h-4 w-4 ${refreshMutation.isPending ? 'animate-spin' : ''}`} />
+              <RefreshCw className={cn('h-4 w-4', refreshMutation.isPending && 'animate-spin')} />
               <span>{t('common.refresh')}</span>
             </MenuItem>
             {allFolders.length > 0 && (
@@ -766,7 +781,7 @@ function SidebarFeedItem({
             </MenuItem>
           </MenuPopup>
         </Menu>
-      </div>
+      </button>
 
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogPopup>

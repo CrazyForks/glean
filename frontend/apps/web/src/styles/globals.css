@@ -555,6 +555,16 @@ body {
     box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
   }
 
+        /* Exclude input elements inside Input component - they have their own focus styling */
+        [data-slot="input-control"] [data-slot="input"]:focus-visible {
+          box-shadow: none;
+        }
+
+        /* Exclude styled inputs from global focus ring */
+        input.outline-none:focus-visible,
+        textarea.outline-none:focus-visible {
+          box-shadow: none;
+        }
   /* Selection color */
   ::selection {
     background: color-mix(in srgb, var(--primary) 30%, transparent);
@@ -1004,6 +1014,11 @@ body {
     min-width: 36px;
   }
 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                /* Minimal touch targets for sidebar internal buttons */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                .touch-target-none {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  min-height: auto;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  min-width: auto;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }
   /* Remove hover effects on touch devices */
   @media (hover: none) {
     .card-hover:hover {
@@ -1097,7 +1112,7 @@ body {
 
 /* Desktop sidebar collapse/expand animation */
 .sidebar-transition {
-  transition: width 300ms ease-out, transform 300ms ease-out;
+  transition: width 300ms ease-out, transform 300ms ease-out, translate 300ms ease-out;
 }
 
 .sidebar-no-transition {
@@ -1285,11 +1300,88 @@ body {
   animation: contentSlideIn 0.2s ease-out forwards;
 }
 
+/* Mobile slide-in animation for article reader */
+@keyframes mobileSlideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Mobile slide-out animation for article reader */
+@keyframes mobileSlideOutToRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Mobile slide-in animation for entry list (from left) */
+@keyframes mobileSlideInFromLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Mobile slide-out animation for entry list (to left) */
+@keyframes mobileSlideOutToLeft {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
 /* Reading pane transition */
 .reader-transition {
   animation: contentFadeIn 0.25s ease-out forwards;
 }
 
+/* Mobile reader slide-in transition */
+@media (max-width: 767px) {
+  .reader-transition {
+    animation: mobileSlideInFromRight 0.3s ease-out forwards;
+  }
+
+  .reader-transition-exit {
+    animation: mobileSlideOutToRight 0.3s ease-in forwards;
+  }
+
+  /* Mobile entry list transitions */
+  .entry-list-transition {
+    animation: mobileSlideInFromLeft 0.3s ease-out forwards;
+  }
+
+  .entry-list-transition-exit {
+    animation: mobileSlideOutToLeft 0.3s ease-in forwards;
+  }
+}
+
+/* Mobile Layout header transition - ensures smooth height animation */
+@media (max-width: 767px) {
+  .layout-header-transition {
+    transition: opacity 0.3s ease-out, height 0.3s ease-out, min-height 0.3s ease-out;
+  }
+}
 /* ==========================================================================
    Article Outline Styles
    ========================================================================== */
@@ -1649,4 +1741,17 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
