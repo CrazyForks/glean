@@ -256,3 +256,26 @@ export interface PreferenceStats {
   }>
   model_updated_at: string | null
 }
+
+// MCP: API Token types
+export interface APIToken {
+  id: string
+  name: string
+  token_prefix: string
+  last_used_at: string | null
+  expires_at: string | null
+  created_at: string
+}
+
+export interface APITokenCreateResponse extends APIToken {
+  token: string // Only returned once during creation
+}
+
+export interface APITokenListResponse {
+  tokens: APIToken[]
+}
+
+export interface CreateAPITokenRequest {
+  name: string
+  expires_in_days?: number | null
+}

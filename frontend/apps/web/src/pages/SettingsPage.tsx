@@ -17,6 +17,7 @@ import {
   ListChecks,
   Sparkles,
   Languages,
+  Key,
 } from 'lucide-react'
 import {
   Label,
@@ -34,6 +35,7 @@ import {
 } from '@glean/ui'
 import { SubscriptionsTab } from '../components/tabs/SubscriptionsTab'
 import { PreferenceTab } from '../components/tabs/PreferenceTab'
+import { APITokensTab } from '../components/tabs/APITokensTab'
 import { useTranslation } from '@glean/i18n'
 
 /**
@@ -427,6 +429,13 @@ export default function SettingsPage() {
                     <Sparkles className="h-5 w-5 shrink-0 md:h-4 md:w-4" />
                     <span className="text-[10px] md:text-sm">{t('tabs.preferences')}</span>
                   </TabsTab>
+                  <TabsTab
+                    value="api-tokens"
+                    className="hover:bg-accent/80 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-primary flex-1 flex-col gap-0.5 rounded-none border-b-2 border-transparent px-2 py-2.5 transition-all duration-200 data-[state=active]:font-medium md:w-full md:flex-none md:flex-row md:justify-start md:gap-2.5 md:rounded-md md:border-b-0 md:px-3 md:py-2.5"
+                  >
+                    <Key className="h-5 w-5 shrink-0 md:h-4 md:w-4" />
+                    <span className="text-[10px] md:text-sm">{t('tabs.apiTokens')}</span>
+                  </TabsTab>
                 </TabsList>
               </div>
 
@@ -524,6 +533,25 @@ export default function SettingsPage() {
                   </div>
                   <div className="animate-fade-in" style={{ animationDelay: '50ms' }}>
                     <PreferenceTab />
+                  </div>
+                </TabsPanel>
+
+                <TabsPanel value="api-tokens" className="h-full w-full min-w-0 p-6">
+                  <div className="animate-fade-in mb-8">
+                    <div className="mb-2 flex items-center gap-3">
+                      <div className="bg-primary/10 ring-primary/20 flex h-10 w-10 items-center justify-center rounded-xl ring-1">
+                        <Key className="text-primary h-5 w-5" />
+                      </div>
+                      <div>
+                        <h2 className="font-display text-foreground text-2xl font-semibold">
+                          {t('apiTokens.title')}
+                        </h2>
+                        <p className="text-muted-foreground text-sm">{t('apiTokens.desc')}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="animate-fade-in" style={{ animationDelay: '50ms' }}>
+                    <APITokensTab />
                   </div>
                 </TabsPanel>
               </div>

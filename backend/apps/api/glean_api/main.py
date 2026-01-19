@@ -16,8 +16,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from glean_core import get_logger, init_logging
 
 from .config import settings
+from .mcp import create_mcp_server
 from .middleware import LoggingMiddleware
-from .routers import admin, auth, bookmarks, entries, feeds, folders, preference, system, tags
+from .routers import (
+    admin,
+    api_tokens,
+    auth,
+    bookmarks,
+    entries,
+    feeds,
+    folders,
+    preference,
+    system,
+    tags,
+)
 
 # Initialize logging system
 init_logging()
@@ -27,6 +39,10 @@ logger = get_logger(__name__)
 
 # Global Redis connection pool for task queue
 redis_pool: ArqRedis | None = None
+
+# Global MCP server instance (created before FastAPI app)
+_mcp_server = create_mcp_server()
+_mcp_http_app = _mcp_server.streamable_http_app()
 
 
 async def get_redis_pool() -> ArqRedis:
@@ -70,7 +86,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     redis_pool = await create_pool(redis_settings)
     logger.info("Redis pool initialized")
 
-    yield
+    # Initialize MCP server session manager
+    async with _mcp_server.session_manager.run():
+        logger.info("MCP server initialized")
+        yield
 
     # Shutdown: Cleanup resources
     if redis_pool:
@@ -110,6 +129,10 @@ app.include_router(folders.router, prefix="/api/folders", tags=["Folders"])
 app.include_router(tags.router, prefix="/api/tags", tags=["Tags"])
 app.include_router(preference.router, prefix="/api/preference", tags=["Preference"])
 app.include_router(system.router, prefix="/api/system", tags=["System"])
+app.include_router(api_tokens.router, prefix="/api/tokens", tags=["API Tokens"])
+
+# Mount MCP server (using pre-created instance from top of file)
+app.mount("/mcp", _mcp_http_app)
 
 
 @app.get("/api/health")
