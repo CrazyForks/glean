@@ -66,3 +66,4 @@ class User(Base, TimestampMixin):
     preference_stats = relationship(
         "UserPreferenceStats", back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
+    api_tokens = relationship("APIToken", back_populates="user", cascade="all, delete-orphan")

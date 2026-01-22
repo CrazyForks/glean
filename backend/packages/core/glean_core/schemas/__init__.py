@@ -2,6 +2,12 @@
 Pydantic schemas for API requests and responses.
 """
 
+from .api_token import (
+    APITokenCreate,
+    APITokenCreateResponse,
+    APITokenListResponse,
+    APITokenResponse,
+)
 from .auth import LoginRequest, RefreshTokenRequest, RegisterRequest, TokenResponse
 from .bookmark import (
     BookmarkCreate,
@@ -54,6 +60,11 @@ from .tag import (
 from .user import UserResponse, UserUpdate
 
 __all__ = [
+    # API Token
+    "APITokenCreate",
+    "APITokenCreateResponse",
+    "APITokenListResponse",
+    "APITokenResponse",
     # Auth
     "LoginRequest",
     "RefreshTokenRequest",

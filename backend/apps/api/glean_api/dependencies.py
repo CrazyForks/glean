@@ -16,6 +16,7 @@ from glean_core.schemas import UserResponse
 from glean_core.schemas.admin import AdminUserResponse
 from glean_core.services import (
     AdminService,
+    APITokenService,
     AuthService,
     BookmarkService,
     EntryService,
@@ -221,6 +222,14 @@ def get_typed_config_service(
 ) -> TypedConfigService:
     """Get typed config service instance."""
     return TypedConfigService(session)
+
+
+# MCP service dependencies
+def get_api_token_service(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> APITokenService:
+    """Get API token service instance."""
+    return APITokenService(session)
 
 
 async def get_current_admin(
