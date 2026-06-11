@@ -393,12 +393,21 @@ export default function ReaderPage() {
     (e: KeyboardEvent) => {
       if (!keyboardNavigationEnabled) return
 
-      // Ignore when focus is in input, textarea, or contenteditable elements
+      // Ignore when focus is in an input, textarea, contenteditable, or any
+      // interactive control that owns its own keyboard navigation (buttons,
+      // links, select elements, and Radix/ARIA widgets such as menus,
+      // listboxes, comboboxes, dialogs, and their items).
       const target = e.target as HTMLElement
       if (
         target.tagName === 'INPUT' ||
         target.tagName === 'TEXTAREA' ||
-        target.isContentEditable
+        target.tagName === 'BUTTON' ||
+        target.tagName === 'SELECT' ||
+        target.tagName === 'A' ||
+        target.isContentEditable ||
+        target.closest(
+          '[role="menu"],[role="menubar"],[role="listbox"],[role="combobox"],[role="dialog"],[role="alertdialog"],[role="tree"],[role="grid"],[role="tablist"]'
+        )
       ) {
         return
       }
